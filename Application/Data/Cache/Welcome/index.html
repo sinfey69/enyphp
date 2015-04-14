@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>mongodb练习-enychen的个人小站</title>
+	<link rel="stylesheet" type="text/css" href="/style/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="/style/css/main.css">
+	<script src="http://cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
+</head>
+<body>
+	<h1>短网址生成</h1>
+	<form method="">
+		<input type="text" name="origin" id="origin">
+		<input type="button" id="shorturl" value="生成">
+	</form>
+	<p id="url"></p>
+	<script type="text/javascript">
+		$('#shorturl').click(function() {
+			$.ajax({
+				url:'welcome/create',
+				type:'post',
+				data:'origin='+$('#origin').val(),
+				dataType:'json',
+				success:function(data) {
+					console.log(data);
+					var anchor = "<a href='/welcome/origin/"+ data.url +"'>点击这</a>";
+					$('#url').html(anchor);
+				}
+			});
+		});
+	</script>
+</body>
+</html>

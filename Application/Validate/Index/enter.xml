@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<form>
+	<input name="age" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据"  />
+	<input name="str" from="GET" rule="STRING" escape="escape" prompt="不合法的字符串" default="chenxiaobo" />
+	<input name="reg" from="GET" rule="REGEXP" pattern="/[1-9]+/" prompt="正则验证失败" />
+	<input name="ip" from="GET" rule="IP" prompt="ip地址有误" />
+	<input name="mail" from="GET" rule="EMAIL" prompt="邮箱格式不正确" />
+	<input name="url" from="GET" rule="URL" prompt="域名地址不正确" default="http://www.enychen.com" />
+	<input name="in" from="GET" rule="EQUALS" in="enychen,lisan" prompt="必须是enychen" />
+	<input name="name" from="GET" rule="STRING" prompt="姓名不能是中文" /> <!-- 此属性不在,也不是必须,则被设置为NULL -->
+	<input name="callback" from="GET" rule="CALLBACK" action="\Library\Callback:test" prompt="这个回调函数出错了" />
+</form>
+
+<!--
+
+通用属性：
+
+name 	名称
+require 是否必须, require="不存在的错误提示"
+from 	来源 get|post
+prompt 	如果出错的提示
+rule 	检查规则 int | string | regexp | ip | email | url | equals
+default 值不存在的时候自定义默认值，如果不设置则默认为NULL
+
+所有案例如下:
+
+整型
+<input name="name" from="get|post" rule="int" range="1,100" prompt="错误提示"  />
+
+字符串
+<input name="name" from="get|post" rule="string" escape="escape|no" prompt="错误提示"  />
+
+正则
+<input name="name" from="get|post" rule="regexp" pattern="/[1-9]+/" prompt="错误提示" />
+
+邮箱|ip|域名
+<input name="name" from="get" rule="ip|email|url" prompt="错误提示" />
+
+相等
+<input name="name" from="get" rule="equals" in="值1[,值2[,...]]" prompt="错误提示" />
+
+回调
+<input name="name" from="get" rule="callback" action="类名:方法名" prompt="错误提示" />
+
+-->
