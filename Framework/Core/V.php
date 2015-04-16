@@ -5,7 +5,7 @@ namespace Core;
 /**
  * 数据检查类
  */
-class Validate
+class V
 {
 	/**
 	 * 数据xml文件目录
@@ -55,7 +55,7 @@ class Validate
 	private static function getRule()
 	{
 		// 文件名
-		$filename = VALIDATE.COMMON_FILE.".xml";
+		$filename = VALIDATE.REQUEST_FILE.".xml";
 		if(!is_file($filename))
 		{
 			return FALSE;
@@ -121,29 +121,29 @@ class Validate
 		{
 			case "INT":
 				// 过滤转义int类型
-				return self::filter_int($rule);
+				return self::filterInt($rule);
 			case "STRING":
-				return self::filter_string($rule);
+				return self::filterString($rule);
 			case "REGEXP":
-				return self::filter_regexp($rule);
+				return self::filterRegexp($rule);
 			case "EMAIL":
 			case "URL":
 			case "IP":
-				return self::filter_network($rule);
+				return self::filterNetwork($rule);
 			case "EQUALS":
 				// 匹配值
-				return self::filter_in($rule);
+				return self::filterIn($rule);
 			case "CALLBACK":
-				return self::filter_callback($rule);
+				return self::filterCallback($rule);
 		}
 	}
 
 	/**
-	 * 过滤int数据
+	 * 过滤整数数据,可设置区间
 	 * @param object 规则对象
 	 * return void
 	 */
-	private static function filter_int($rule)
+	private static function filterInt($rule)
 	{
 		// 设置验证规则
 		$rule->rule = FILTER_VALIDATE_INT;
@@ -168,7 +168,7 @@ class Validate
 	 * @param object 规则对象
 	 * return void
 	 */
-	private static function filter_regexp($rule)
+	private static function filterRegexp($rule)
 	{
 		$rule->rule = FILTER_VALIDATE_REGEXP;
 		$rule->options['options']['regexp'] = $rule->pattern;
@@ -180,7 +180,7 @@ class Validate
 	 * @param object 规则对象
 	 * return void
 	 */
-	private static function filter_network($rule)
+	private static function filterNetwork($rule)
 	{
 		$rule->rule = constant('FILTER_VALIDATE_' . $rule->rule);
 		self::filter($rule);
@@ -191,15 +191,31 @@ class Validate
 	 * @param object 规则对象
 	 * return void
 	 */
-	private static function filter_string($rule)
+	private static function filterString($rule)
 	{
 		// 字符串xss检查
 		if(preg_match('/(<script|<iframe|<link|<frameset|<vbscript|<form)/i', $rule->value))
 		{
 			throw new FormException($rule->prompt);
 		}
+		// 字符串长度检查
+		if(isset($rule->length))
+		{
+			$length = explode(',', $rule->length);
+			// 最大长度
+			if( (!empty($length[1])) && (strlen($rule->value) > $length[1]) )
+			{
+				throw new FormException($rule->prompt);
+			}
+			// 最小长度
+			if( $length[0] && (strlen($rule->value) < $length[0]) )
+			{
+				throw new FormException($rule->prompt);
+			}
+
+		}
 		// 转义字符串
-		if(empty($rule->escape) || ($rule->escape == 'escape'))
+		if(empty($rule->escape))
 		{
 			 $rule->value = htmlspecialchars($rule->value);
 		}
@@ -212,7 +228,7 @@ class Validate
 	 * @param object 规则对象
 	 * return void
 	 */
-	private static function filter_in($rule)
+	private static function filterIn($rule)
 	{
 		$in = explode(',', $rule->in);
 		if(!in_array($rule->value, $in))
@@ -226,7 +242,7 @@ class Validate
 	 * 回调方法进行验证
 	 * @param object 规则对象
 	 */
-	private static function filter_callback($rule)
+	private static function filterCallback($rule)
 	{
 		// 解析类和方法
 		list($class, $method) = explode(':',$rule->action);
@@ -284,4 +300,11 @@ class Validate
 			$GLOBALS[$key] = $global;
 		}
 	}
+}
+
+/**
+ * 专门为验证类提供抛出的表单异常类
+ */
+class FormException extends \Exception
+{
 }

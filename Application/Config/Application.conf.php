@@ -3,8 +3,8 @@
 /**
  * 路由默认信息
  */
-$config['routes']['class'] = 'Index';
-$config['routes']['function'] = 'enter';
+$config['routes']['class'] = 'Home';
+$config['routes']['function'] = 'index';
 $config['routes']['suffix'] = 'html';
 
 /**

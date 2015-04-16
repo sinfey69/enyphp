@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <form>
 	<input name="age" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据"  />
+	<input name="0" from="REQUEST" rule="INT" range="1,100" prompt="必须是1-100之间的数据" />
 	<input name="str" from="GET" rule="STRING" escape="escape" prompt="不合法的字符串" default="chenxiaobo" />
 	<input name="reg" from="GET" rule="REGEXP" pattern="/[1-9]+/" prompt="正则验证失败" />
 	<input name="ip" from="GET" rule="IP" prompt="ip地址有误" />

@@ -6,7 +6,7 @@ namespace Core;
  * 路由分析类
  * @author Eny
  */
-class Dispatch
+class D
 {
 	/**
 	 * 默认路由器
@@ -20,15 +20,17 @@ class Dispatch
 	 */
 	public static function parseUrl()
 	{
-		// 初始化请求环境
+		// 初始化路由环境
 		self::init();
-		// 获取默认的路由配置
-		self::$routes = Config::G('routes');
+		// 初始化文件
+		self::$routes = C::routes();
 		// 获取请求的路径
 		$routes = self::getRouter();
 		// 设置路由信息
-		self::setRouter($routes);
-		// 路由结果返回
+		$routes = self::setRouter($routes);
+		// 设置调用信息
+		self::setController($routes);
+		// 返回信息
 		return array(self::$routes['class'], self::$routes['function']);
 	}
 
@@ -48,7 +50,6 @@ class Dispatch
 
 	/**
 	 * 获得请求的路由
-	 * @param object 请求对象
 	 * @return array
 	 */
 	private static function getRouter()
@@ -60,7 +61,7 @@ class Dispatch
 		}
 		else
 		{
-			$routes = empty($_SERVER['PATH_INFO']) ? NULL : trim($_SERVER['PATH_INFO'], '/');
+			$routes = trim(F::server('PATH_INFO', NULL), '/');
 			str_replace('.'.self::$routes['suffix'], '',  $routes);
 			$routes = explode('/', $routes);
 		}
@@ -84,39 +85,37 @@ class Dispatch
 				break;
 			}
 			// 非法请求参数
-			if(!preg_match('/^([a-zA-Z])+$/', $routes[0])) 
+			if(!preg_match('/^([a-z])+$/', $routes[0])) 
 			{
 				// 禁止操作
-				self::location(403);
+				throw new \Exception(403);
 			}
 			// 路由设置
 			self::$routes[$val] = $routes[0];
 			array_splice($routes, 0, 1);
 		}
 
-		// 定义通用文件名
-		define('COMMON_FILE', self::$routes['class']."/".self::$routes['function']);
-
-		// 控制器信息
-		self::$routes['class'] = '\\Controller\\' . ucfirst(self::$routes['class']);
-		self::$routes['function'] = strtolower(self::$routes['function']);
-		
-		// 控制器是否存在
-		method_exists(self::$routes['class'], self::$routes['function']) OR self::location(404);
-
-		// url请求参数设置到$_REQUEST;
-		$_REQUEST = $routes;
+		return $routes;
 	}
 
 	/**
-	 * 获得$_SERVER中的内容
-	 * @param  string 下标值
-	 * @param  找不到值后的默认值
-	 * @return mixed 找到返回内容,否则返回第二个参数的内容
+	 * 初始化控制器信息
+	 * @param array 剩下的路由信息
+	 * @return void
 	 */
-	public static function server($index, $defualt=FALSE)
+	private static function setController($routes)
 	{
-		return empty($_SERVER[$index]) ? $defualt : addslashes($_SERVER[$index]);
+		// 定义通用文件名
+		define('REQUEST_FILE', self::$routes['class']."/".self::$routes['function']);
+		// 文件名首字母大写
+		self::$routes['class'] = '\\Controller\\'.ucfirst(self::$routes['class']);
+		// 判断文件是否存在
+		if(!method_exists(self::$routes['class'], self::$routes['function']))
+		{
+			throw new \Exception(404);
+		}
+		// url请求参数设置到$_REQUEST;
+		$_REQUEST = $routes;
 	}
 
 	/**
@@ -126,7 +125,7 @@ class Dispatch
 	private static function isMoblie()
 	{
 		$isMoblie = FALSE;
-		if($userAgent = self::server('HTTP_USER_AGENT'))
+		if($userAgent = F::server('HTTP_USER_AGENT'))
 		{
 			// 手机代理信息
 			$mobileType = array("240x320","acer","acoon","acs-","abacho","ahong","airness","alcatel","amoi",
@@ -155,65 +154,5 @@ class Dispatch
 		}
 		
 		return $isMoblie;
-	}
-
-		/**
-	 * 获取客户端的ip地址
-	 * @return mixed 找到返回ip地址,否则返回FALSE
-	 */
-	public static function ip()
-	{
-		if(IS_CLI)
-		{
-			return '0.0.0.0';
-		}
-
-		$froms = array(
-			'HTTP_CLIENT_IP',
-			'HTTP_X_FORWARDED_FOR',
-			'HTTP_X_FORWARDED',
-			'HTTP_FORWARDED_FOR',
-			'REMOTE_ADDR'
-		);
-		foreach($froms as $from)
-		{
-			if($ip = getenv($from))
-			{
-				break;
-			}
-		}
-		return $ip;
-	}
-
-	/**
-	 * 获取浏览器语言,目前只识别中英法德日韩西瑞
-	 * @param string 默认语言
-	 * @return string
-	 */
-	public function language($default='zh-cn')
-	{
-		if($language = self::server('HTTP_ACCEPT_LANGUAGE'))
-		{
-			$types = array('zh-cn', 'zh', 'en', 'fr', 'de', 'jp', 'ko', 'es', 'sv');
-			foreach($types as $type)
-			{
-				$pattern = "/{$type}/i";
-				if(preg_match($pattern, $language))
-				{
-					return $type;
-				}
-			}
-		}
-		return $default;
-	}
-
-	/**
-	 * 页面跳转
-	 * @param int 错误代码 
-	 * @return void
-	 */
-	public static function location($code)
-	{
-		header("Location: /{$code}.html");
 	}
 }

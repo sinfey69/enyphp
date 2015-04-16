@@ -6,7 +6,7 @@ namespace Core;
  * 模板解析类
  * @author Eny
  */
-class Template
+class T
 {
 	/**
 	 * 模板目录
@@ -48,18 +48,18 @@ class Template
 	 * 模板语法规则
 	 */
 	private $rules = array(
-		'/\{include=(.+)\}/iU' 		     	=> '<?php $this->display("$1", $this->vars); ?>',
-		'/\{if=(.+)\}/iU'	      		     	=> '<?php if($1) { ?>',
-		'/\{elseif=(.+)\}/' 	      		=> '<?php } elseif($1) { ?>',
-		'/\{else\}/iU'	      		     	=> '<?php } else { ?>',
-		'/\{\/if\}/iU'	      		     	=> '<?php } ?>',
-		'/\{loop=(.+)\|(.+)\}/iU'  		     	=> '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
-		'/\{\/loop\}/iU'	      		     	=> '<?php }} ?>',
-		'/\{break\}/iU'	      		     	=> '<?php break; ?>',
-		'/\{continue\}/iU'	      	     	=> '<?php continue; ?>',
-		'/\{plugin=\$(.+)\}/iU'               		=> '<?php echo $this->plugin("$1"); ?>',
-		'/\{const=([A-Za-z_][A-Za-z0-9_]*)\]/' 	=> '<?php echo $1; ?>',
-		'/\{var=\$([a-zA-Z0-9_].*)\}/iU'	    	=> '<?php echo $$1; ?>',
+		'/<include=(.+)>/iU' 		     	=> '<?php $this->display("$1", $this->vars); ?>',
+		'/<if=(.+)>/iU'	      		     	=> '<?php if($1) { ?>',
+		'/<elseif=(.+)>/' 	      			=> '<?php } elseif($1) { ?>',
+		'/<else>/iU'	      		     	=> '<?php } else { ?>',
+		'/<\/if>/iU'	      		     	=> '<?php } ?>',
+		'/<loop=(.+)\|(.+)>/iU'  		    => '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
+		'/<\/loop>/iU'	      		     	=> '<?php }} ?>',
+		'/<break>/iU'	      		     	=> '<?php break; ?>',
+		'/<continue>/iU'	      	     	=> '<?php continue; ?>',
+		'/<module\s+action=(.+)>/iU'		=> '<?php echo M::module("$1"); ?>',
+		'/<const=([A-Za-z_][A-Za-z0-9_]*)>/'=> '<?php echo $1; ?>',
+		'/<var=\$([a-zA-Z0-9_].*)>/iU'	    => '<?php echo $$1; ?>',
 	);
 
 	/**
@@ -202,37 +202,6 @@ class Template
 
 		// 写入到文件
 		file_put_contents($cpl, $content);
-	}
-
-	/**
-	 * 插件机制
-	 * @param string 插件名成
-	 * @return string
-	 */
-	private function plugin($args)
-	{
-		// 格式化插件
-		if($plugins = explode("|", $args))
-		{
-			// 获取执行的参数方法
-			$inner = array_splice($plugins, 0, 1)[0];
-			// 格式化的参数
-			$inner = $this->vars[$inner];
-			// 附加参数
-			$params = explode(':', $plugins[0]);
-			// 执行方法
-			$method = array_splice($params, 0, 1)[0];
-			// 整合数据
-			array_unshift($params, $inner);
-
-			// 文件名
-			$filename = sprintf("%s%s.plugin.php", $this->pPath, $method);
-			// 加载文件
-			require_once($filename);
-
-			// 执行方法进行输出
-			return call_user_func_array($method, $params);
-		}
 	}
 
 	/**

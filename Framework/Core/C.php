@@ -2,7 +2,7 @@
 
 namespace Core;
 
-class Config
+class C
 {
 	/**
 	 * 通用配置数组
@@ -21,6 +21,18 @@ class Config
 	private final function __clone(){}
 
 	/**
+	 * 简单的获取配置
+	 * @param string 键
+	 * @param string 键
+	 * @return mixed
+	 */
+	public static function __callStatic($method, $args)
+	{
+		array_unshift($args, $method);
+		return call_user_func_array('self::G', $args);
+	}
+
+	/**
 	 * 加载配置
 	 * @return void
 	 */
@@ -29,7 +41,6 @@ class Config
 		// 读取通用配置
 		$global = glob(CONFIG."*.conf.php");
 		$debug = DEBUG ? glob(CONFIG."*.debug.php") : array();
-
 		// 加载配置文件
 		foreach(array_merge($global, $debug) as $file)
 		{
@@ -42,7 +53,7 @@ class Config
 	 * 获取配置
 	 * @param string 键
 	 * @param string 键
-	 * @return object|string 返回对象或者
+	 * @return mixed
 	 */
 	public static function G($index, $item=NULL)
 	{
@@ -59,4 +70,3 @@ class Config
 		return $pref;
 	}
 }
-
