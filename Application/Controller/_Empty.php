@@ -43,7 +43,7 @@ class _Empty extends Controller
 	 */
 	public static function _E($message, $code=NULL, $url=NULL)
 	{
-
+		exit($message);
 	}
 
 	/**

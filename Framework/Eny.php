@@ -9,6 +9,7 @@ use \Core\C;
 use \Core\D;
 use \Core\L;
 use \Core\V;
+use \Controller\_Empty;
 
 class Eny
 {
@@ -26,13 +27,14 @@ class Eny
 		define('VALIDATE',APPLICATION.'Validate/');// 数据xml文件目录
 		define('LANGUAGE',APPLICATION.'Language/');// 语言包目录
 		define('VIEW',APPLICATION.'View/');// 模板目录
-		define('MODULE',APPLICATION.'Module/');//模块目录
+		define('PLUGIN',APPLICATION.'Plugin/');//模块目录
 		define('DATA',APPLICATION.'Data/');// 数据目录
 		define('LOG',DATA.'Log/');// 日志目录
 		define('CACHE',DATA.'Cache/');// 缓存目录
-		define('FONT',CACHE.'Font/');// 字体目录
-		define('FILE',CACHE.'File/');// 文件目录
-		define('LOCK',CACHE.'Lock/');// 锁机制目录
+		define('COMPILE',DATA.'Compile/');// 模版编译文件
+		define('FONT',DATA.'Font/');// 字体目录
+		define('FILE',DATA.'File/');// 文件目录
+		define('LOCK',DATA.'Lock/');// 锁机制目录
 
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
@@ -109,7 +111,7 @@ class Eny
 		// 错误转向
 		L::systemError($errno, $errstr, $errfile, $errline);
 		// 抛出500服务器错误
-		\Controller\_Empty::_500();
+		_Empty::_500();
 		// 结束程序
 		exit;
 	}	
@@ -129,16 +131,25 @@ class Eny
 				{
 					case 403:
 						// 禁止操作
-						\Controller\_Empty::_403();
+						_Empty::_403();
 						break;
 					case 404:
 						// 找不到页面
-						\Controller\_Empty::_404();
+						_Empty::_404();
 						break;
+					default:
+						_Empty::_E($e->getMessage(), $e->getCode());
 				}
 				break;
 			default:
-				self::appError('E_EXCEPTION', $e->getMessage(), $e->getFile(), $e->getLine());
+				if(DEBUG)
+				{
+					exit($e->getMessage().' on File <b>'.$e->getFile().'</b>, Line at <b>'.$e->getLine().'</b>');
+				}
+				else
+				{
+					self::appError('E_EXCEPTION', $e->getMessage(), $e->getFile(), $e->getLine());
+				}
 		}
 	}
 

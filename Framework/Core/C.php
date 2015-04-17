@@ -39,7 +39,7 @@ class C
 	public static function load()
 	{
 		// 读取通用配置
-		$global = glob(CONFIG."*.conf.php");
+		$global = glob(CONFIG."*.php");
 		$debug = DEBUG ? glob(CONFIG."*.debug.php") : array();
 		// 加载配置文件
 		foreach(array_merge($global, $debug) as $file)

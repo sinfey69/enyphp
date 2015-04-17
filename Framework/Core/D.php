@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use \Mvc\View;
+
 /**
  * 路由分析类
  * @author Eny
@@ -30,6 +32,8 @@ class D
 		$routes = self::setRouter($routes);
 		// 设置调用信息
 		self::setController($routes);
+		// 真缓存检查
+		!C::view('cache') OR self::really();
 		// 返回信息
 		return array(self::$routes['class'], self::$routes['function']);
 	}
@@ -154,5 +158,18 @@ class D
 		}
 		
 		return $isMoblie;
+	}
+
+	/**
+	 * 真缓存直接加载文件
+	 * @return void
+	 */
+	public static function really()
+	{
+		$view = new View();
+		if($view->isCache(REQUEST_FILE, (isset($_REQUEST[0]) ? "{$_REQUEST[0]}" : NULL)))
+		{
+			exit;
+		}
 	}
 }

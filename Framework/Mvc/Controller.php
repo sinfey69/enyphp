@@ -9,10 +9,17 @@ namespace Mvc;
 abstract class Controller
 {
 	/**
+	 * 模版对象
+	 * @var object
+	 */
+	protected $view;
+
+	/**
 	 * 构造函数
 	 */
-	public function __construct()
+	public final function __construct()
 	{
-		
+		// 创造视图对象
+		$this->view = new \Mvc\View();	
 	}
 }

@@ -94,7 +94,7 @@ class V
 			// 是否必须项
 			if(isset($rule->require))
 			{
-				throw new \FormException($rule->require);
+				throw new \Exception($rule->require);
 			}
 			// 不存在的内容设置为NULL
 			$rule->value = isset($rule->default) ? $rule->default : NULL;
@@ -196,7 +196,7 @@ class V
 		// 字符串xss检查
 		if(preg_match('/(<script|<iframe|<link|<frameset|<vbscript|<form)/i', $rule->value))
 		{
-			throw new FormException($rule->prompt);
+			throw new \Exception($rule->prompt);
 		}
 		// 字符串长度检查
 		if(isset($rule->length))
@@ -233,7 +233,7 @@ class V
 		$in = explode(',', $rule->in);
 		if(!in_array($rule->value, $in))
 		{
-			throw new \FormException($rule->prompt);
+			throw new \Exception($rule->prompt);
 		}
 		self::set($rule);
 	}
@@ -252,7 +252,7 @@ class V
 		$result = $object->$method($rule->value);
 		if($result === FALSE)
 		{
-			throw new FormException($rule->prompt);
+			throw new \Exception($rule->prompt);
 		}
 		// 设置值
 		self::set($rule);
@@ -270,7 +270,7 @@ class V
 		// 错误抛出
 		if($result === FALSE)
 		{
-			throw new FormException($rule->prompt);
+			throw new \Exception($rule->prompt);
 		}
 		// 设置值
 		self::set($rule);
@@ -300,11 +300,4 @@ class V
 			$GLOBALS[$key] = $global;
 		}
 	}
-}
-
-/**
- * 专门为验证类提供抛出的表单异常类
- */
-class FormException extends \Exception
-{
 }

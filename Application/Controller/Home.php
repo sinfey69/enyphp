@@ -11,10 +11,13 @@ class Home extends Controller
 {
 	public function index()
 	{
-		L::log('test/chenxiaobo', array('name'=>'chenxiaobo', 'age'=>25, 'sex'=>'男'));
-		echo '<pre>';
-		print_r($_REQUEST);
-		exit;
+		$data = array(
+			'list'=>array(1,2,3,4,5,6,7,8,9),
+			'website'=>array('e.enychen.com','t.enychen.com'),
+			'author'=>'enychen',
+		);
+
+		$this->view->display(REQUEST_FILE, $data, $_REQUEST[0]);
 		/*$model = new \Model\Test();
 
 		$model->testInsert();*/
