@@ -113,29 +113,59 @@ class V
 	private static function check($rule)
 	{
 		// 来源值
-		$rule->value = $GLOBALS["{$rule->from}"][$rule->name];
+		$rule->temp = explode(',', $GLOBALS["{$rule->from}"][$rule->name]);
 		// 验证选项
 		$rule->options = array('options'=>array());
-		// 规则检查
-		switch($rule->rule)
+		// 暂存值
+		$save = array();
+
+		// 循环遍历检查数组
+		for($i=0,$len=count($rule->temp); $i<$len; $i++)
 		{
-			case "INT":
-				// 过滤转义int类型
-				return self::filterInt($rule);
-			case "STRING":
-				return self::filterString($rule);
-			case "REGEXP":
-				return self::filterRegexp($rule);
-			case "EMAIL":
-			case "URL":
-			case "IP":
-				return self::filterNetwork($rule);
-			case "EQUALS":
-				// 匹配值
-				return self::filterIn($rule);
-			case "CALLBACK":
-				return self::filterCallback($rule);
+			// 设置当前要检查的值
+			$rule->value = $rule->temp[$i];
+			// 规则检查
+			switch($rule->rule)
+			{
+				case "INT":
+					// 过滤转义int类型
+					$save[$i] = self::filterInt($rule);
+					break;
+				case "STRING":
+					$save[$i] = self::filterString($rule);
+					break;
+				case "REGEXP":
+					$save[$i] = self::filterRegexp($rule);
+					break;
+				case "EMAIL":
+				case "URL":
+				case "IP":
+					$save[$i] = self::filterNetwork($rule);
+					break;
+				case "EQUALS":
+					// 匹配值
+					$save[$i] = self::filterIn($rule);
+					break;
+				case "LENGTH":
+					$save[$i] = self::filterLength($rule);
+					break;
+				case "PAGE":
+					$save[$i] = self::filterLength($rule);
+					break;
+				case "CALLBACK":
+					$save[$i] = self::filterCallback($rule);
+					break;
+			}
+
+			// 去掉空格
+			$save[$i] = trim($save[$i]);
 		}
+
+		// 单个值还是一整个数组
+		$rule->value = $i > 1 ? $save : reset($save);
+
+		// 设置值
+		self::set($rule);
 	}
 
 	/**
@@ -146,7 +176,7 @@ class V
 	private static function filterInt($rule)
 	{
 		// 设置验证规则
-		$rule->rule = FILTER_VALIDATE_INT;
+		$rule->condition = FILTER_VALIDATE_INT;
 		// 包含区间
 		$range = isset($rule->range) ? explode(',', $rule->range) : array();
 		// 区间最小值
@@ -160,7 +190,7 @@ class V
 			$rule->options['options']['max_range'] = $range[1];
 		}
 		// 验证
-		self::filter($rule);
+		return self::filter($rule);
 	}
 
 	/**
@@ -170,9 +200,9 @@ class V
 	 */
 	private static function filterRegexp($rule)
 	{
-		$rule->rule = FILTER_VALIDATE_REGEXP;
+		$rule->condition = FILTER_VALIDATE_REGEXP;
 		$rule->options['options']['regexp'] = $rule->pattern;
-		self::filter($rule);
+		return self::filter($rule);
 	}
 
 	/**
@@ -182,8 +212,8 @@ class V
 	 */
 	private static function filterNetwork($rule)
 	{
-		$rule->rule = constant('FILTER_VALIDATE_' . $rule->rule);
-		self::filter($rule);
+		$rule->condition = constant('FILTER_VALIDATE_' . $rule->rule);
+		return self::filter($rule);
 	}
 
 	/**
@@ -219,8 +249,7 @@ class V
 		{
 			 $rule->value = htmlspecialchars($rule->value);
 		}
-		//过滤
-		self::set($rule);
+		return $rule->value;
 	}
 
 	/**
@@ -235,7 +264,7 @@ class V
 		{
 			throw new \Exception($rule->prompt);
 		}
-		self::set($rule);
+		return $rule->value;
 	}
 
 	/**
@@ -244,18 +273,14 @@ class V
 	 */
 	private static function filterCallback($rule)
 	{
-		// 解析类和方法
-		list($class, $method) = explode(':',$rule->action);
-		// 创建对象
-		$object = new $class();
-		// 对象值
-		$result = $object->$method($rule->value);
-		if($result === FALSE)
+		require_once(PLUGIN."Validate/{$rule->method}.php");
+		$result = call_user_func_array($rule->method, array($rule->value));
+		if($result === $rule->value)
 		{
 			throw new \Exception($rule->prompt);
 		}
 		// 设置值
-		self::set($rule);
+		return $result;
 	}
 
 	/**
@@ -266,14 +291,14 @@ class V
 	private static function filter($rule)
 	{
 		// 检查
-		$result = filter_var($rule->value, $rule->rule, $rule->options);
+		$result = filter_var($rule->value, $rule->condition, $rule->options);
 		// 错误抛出
 		if($result === FALSE)
 		{
 			throw new \Exception($rule->prompt);
 		}
 		// 设置值
-		self::set($rule);
+		return $result;
 	}
 
 	/**
@@ -284,9 +309,25 @@ class V
 	private static function set($rule)
 	{
 		// 替换别名
-		$name = isset($rule->alias) ? $rule->alias : $rule->name;
+		$name = isset($rule->alias) ? 
+			str_replace(array(' lte', ' gte', ' lt', ' gt'), array(' <=',' >=',' <', ' >'), $rule->alias) : $rule->name;
+		// 替换来源
+		$from = isset($rule->to) ? "_{$rule->to}" : $rule->from;
+		// 格式化数据
+		$value = isset($rule->format) ? str_replace(":{$name}", $rule->value, $rule->format) : $rule->value;
+
 		// 设置值
-		self::$valid[$rule->from][$name] = $rule->value;
+		if(isset($rule->aggregate))
+		{
+		 	foreach(explode(':', $rule->aggregate) as $key)
+		 	{
+		 		self::$valid[$from][$key][$name] = $value;
+		 	}
+		}
+		else
+		{
+			self::$valid[$from][$name] = $value;
+		}
 	}
 
 	/**

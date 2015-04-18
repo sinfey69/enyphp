@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <form>
-	<input name="age" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据"  />
-	<input name="0" from="REQUEST" rule="INT" range="1,100" prompt="必须是1-100之间的数据" />
-	<input name="str" from="GET" rule="STRING" escape="escape" prompt="不合法的字符串" default="chenxiaobo" />
+	<input name="age" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="age gte" />
+	<input name="0" from="REQUEST" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="id" to="GET" />
+	<input name="str" from="GET" rule="STRING" escape="escape" format="%:str%" prompt="不合法的字符串" default="chenxiaobo" />
 	<input name="reg" from="GET" rule="REGEXP" pattern="/[1-9]+/" prompt="正则验证失败" />
 	<input name="ip" from="GET" rule="IP" prompt="ip地址有误" />
 	<input name="mail" from="GET" rule="EMAIL" prompt="邮箱格式不正确" />
 	<input name="url" from="GET" rule="URL" prompt="域名地址不正确" default="http://www.enychen.com" />
 	<input name="in" from="GET" rule="EQUALS" in="enychen,lisan" prompt="必须是enychen" />
-	<input name="name" from="GET" rule="STRING" prompt="姓名不能是中文" /> <!-- 此属性不在,也不是必须,则被设置为NULL -->
-	<input name="callback" from="GET" rule="CALLBACK" action="\Library\Callback:test" prompt="这个回调函数出错了" />
+	<input name="name" from="GET" rule="STRING" prompt="姓名不能是中文" />
+	<input name="page" from="GET" rule="INT" default="1" aggregate="limit" />
+	<input name="number" from="GET" rule="INT" default="4" aggregate="limit" />
 </form>
 
 <!--
@@ -22,6 +23,9 @@ from 	来源 get|post
 prompt 	如果出错的提示
 rule 	检查规则 int | string | regexp | ip | email | url | equals
 default 值不存在的时候自定义默认值，如果不设置则默认为NULL
+aggregate 把某些数据统一归类到一个key下
+to 可设置为GET|POST|REQUEST,把原本的from数组的值移动到指定的to中
+
 
 所有案例如下:
 
