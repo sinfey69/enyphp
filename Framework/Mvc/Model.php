@@ -60,16 +60,22 @@ class Model
 	/**
 	 * 创建模型
 	 * @param string 要使用的数据库配置
+	 * @return void
 	 */
 	public function __construct($key='mysql')
 	{
 		// 读取配置
 		$driver = \Core\Config::G($key);
-
-		// 创建数据库池
+		// 创建数据库
 		$this->db = Mysql::instance($driver);
 	}
 
+	/**
+	 * 条件回调方法
+	 * @param string field|where|having|order|group|limit
+	 * @param array 参数列表
+	 * @return \Mvc\Model
+	 */
 	public function __call($method, $args)
 	{
 		switch($method)
@@ -83,16 +89,7 @@ class Model
 				$this->condition[$method] = strtoupper($method)." BY {$args[0]}";
 				break;
 			case "limit":
-				$limit = is_array($args[0]) ? $args[0] : explode(',', $args[0]);
-				$offset = "";
-				if((count($args[0]) == 2))
-				{
-					$offset = ":LIMIT_offset,";
-					$this->values[':LIMIT_offset'] = (int)$limit[0];
-				}
-				$number = ":LIMIT_number";
-				$this->values[':LIMIT_number'] = (int)array_pop($limit);
-				$this->condition["limit"] = "LIMIT {$offset}{$number}";
+				$this->limit($args[0]);
 				break;
 			case "where":
 			case "having":
@@ -261,7 +258,7 @@ class Model
 					foreach($option as $k=>$o)
 					{
 						$o = array($o[0]=>$o[1]);
-						list($or[], $data) = $this->where($o, 'where', TRUE);
+						list($or[], $data) = $this->where($o, $field, TRUE);
 					}
 					$where[]  = "(".implode(" OR ", $or).")";
 				}
@@ -308,7 +305,30 @@ class Model
 			$this->condition[$field] = strtoupper($field)." ".implode(' AND ', $where);
 		}
 	}
+	
+	/**
+	 * LIMIT
+	 * @param string|array|int 分页信息
+	 * @return void
+	 */
+	private function limit($limit)
+	{
+		$limit = is_array($limit) ? $limit : explode(',', $limit);
+		$offset = "";
+		if((count($limit) == 2))
+		{
+			$offset = ":LIMIT_offset,";
+			$this->values[':LIMIT_offset'] = ($limit[0]-1)*$limit[1];
+		}
+		$number = ":LIMIT_number";
+		$this->values[':LIMIT_number'] = (int)array_pop($limit);
+		$this->condition["limit"] = "LIMIT {$offset}{$number}";
+	}
 
+	/**
+	 * 所有查询条件全部置为空
+	 * @return void
+	 */
 	public final function setNull()
 	{
 		$this->condition = array(

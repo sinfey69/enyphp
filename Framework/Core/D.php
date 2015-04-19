@@ -110,7 +110,7 @@ class D
 	private static function setController($routes)
 	{
 		// 定义通用文件名
-		define('REQUEST_FILE', self::$routes['class']."/".self::$routes['function']);
+		define('REQUEST_FILE', ucfirst(self::$routes['class'])."/".self::$routes['function']);
 		// 文件名首字母大写
 		self::$routes['class'] = '\\Controller\\'.ucfirst(self::$routes['class']);
 		// 判断文件是否存在

@@ -154,7 +154,7 @@ class View
 		// 模板文件
 		$files[] = "{$this->templateDir}{$tpl}.html";
 		// 编译文件
-		$files[] = $this->compileDir.md5(strtolower($tpl)).".php";
+		$files[] = $this->compileDir.md5($tpl).".php";
 		// 缓存文件
 		$files[] = $this->cacheDir.md5(strtolower("{$tpl}_{$id}")).".html";
 

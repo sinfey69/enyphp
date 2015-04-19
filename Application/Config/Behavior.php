@@ -12,4 +12,4 @@ $config['routes']['suffix'] = 'html';
  */
 $config['view']['theme'] = '';
 $config['view']['expire'] = '1440';
-$config['view']['cache'] = TRUE;
+$config['view']['cache'] = FALSE;
