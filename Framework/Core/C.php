@@ -2,6 +2,10 @@
 
 namespace Core;
 
+/**
+ * 配置信息类
+ * @author enychen
+ */
 class C
 {
 	/**
@@ -12,11 +16,13 @@ class C
 
 	/**
 	 * 禁止创建对象
+	 * @return void
 	 */
 	private final function __construct(){}
 
 	/**
 	 * 禁止克隆对象
+	 * @return void
 	 */
 	private final function __clone(){}
 
@@ -40,6 +46,7 @@ class C
 	{
 		// 读取通用配置
 		$global = glob(CONFIG."*.php");
+		// 读取开发配置
 		$debug = DEBUG ? glob(CONFIG."*.debug.php") : array();
 		// 加载配置文件
 		foreach(array_merge($global, $debug) as $file)
@@ -47,6 +54,9 @@ class C
 			require($file);
 			self::$_CFG = array_merge($config, self::$_CFG);
 		}
+
+		// 把数组转成对象
+		self::$_CFG = F::toObject(self::$_CFG);
 	}
 
 	/**
@@ -57,13 +67,20 @@ class C
 	 */
 	public static function G($index, $item=NULL)
 	{
-		// 取出一个对象
-		$pref = isset(self::$_CFG[$index]) ? self::$_CFG[$index] : FALSE;
+		// 取出一个内容
+		$pref = isset(self::$_CFG->$index) ? self::$_CFG->$index : NULL;
 
+		// 取出一个值
 		if($item && $pref)
 		{
-			// 取出第二个参数
-			$pref =  isset($pref[$item]) ? $pref[$item] : FALSE;
+			if(is_array($pref))
+			{
+			 	$pref = isset($pref[$item]) ? $pref[$item] : NULL;
+			}
+			else
+			{
+				$pref = isset($pref->$item) ? $pref->$item : NULL;
+			}
 		}
 				
 		// 返回参数

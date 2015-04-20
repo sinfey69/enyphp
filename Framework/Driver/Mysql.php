@@ -45,8 +45,6 @@ class Mysql
 	{
 		// 保存配置信息
 		$this->drivers = $drivers;
-
-		$this->changeDb(0);
 	}
 
 	/**

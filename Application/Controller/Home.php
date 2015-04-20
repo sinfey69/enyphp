@@ -17,7 +17,7 @@ class Home extends Controller
 			'author'=>'enychen',
 		);
 
-		$this->view->display(REQUEST_FILE, $data, $_REQUEST[0]);
+		$this->view->display(REQUEST_FILE, $data, $_GET[0]);
 		/*$model = new \Model\Test();
 
 		$model->testInsert();*/

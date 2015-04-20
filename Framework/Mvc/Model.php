@@ -27,6 +27,12 @@ class Model
 	const FETCH_COLUMN = 'fetchColumn';
 
 	/**
+	 * 返回影响的行数
+	 * @var string
+	 */
+	const FETCH_AFFECTROW = 'affectRow';
+
+	/**
 	 * 表名
 	 * @var string
 	 */
@@ -76,7 +82,7 @@ class Model
 	 * @param array 参数列表
 	 * @return \Mvc\Model
 	 */
-	public function __call($method, $args)
+	public final function __call($method, $args)
 	{
 		switch($method)
 		{
@@ -107,24 +113,26 @@ class Model
 	 * @param array 插入键值对数组
 	 * @return int 上一次插入的id | 影响的行数
 	 */
-	public final function insert(array $insert)
+	public final function insert(array $insert=array(), $type='lastInsertId')
 	{
+		// 从$_POST中获取数据
+		$insert = $insert ? : $_POST;
 		// 二维数组化
 		$insert = count($insert) != count($insert, COUNT_RECURSIVE) ? $insert : array($insert);
+
 		// 所有key
 		$keys = array_keys($insert[0]);
 		// 所有value
 		foreach($insert as $key=>$val)
 		{
 			$temp = array();
-			foreach($keys as $k=>$v)
+			foreach($keys as $field)
 			{
-				$temp[] = ":{$v}_{$key}{$k}";
-				$values[":{$v}_{$key}{$k}"] = array_shift($val);
+				$temp[] = ":{$field}{$key}";
+				$values[":{$field}{$key}"] = array_shift($val);
 			}
 			$placeholder[] = "(".implode(',', $temp).")";
 		}
-
 		// array转成string
 		$keys = implode(',', $keys);
 		$placeholder = implode(',', $placeholder);
@@ -134,18 +142,24 @@ class Model
 		// 执行sql语句
 		$this->db->query($sql, $values);
 		// 插入的id
-		return $this->db->lastInsertId();
+		return $this->db->$type();
 	}
 
 	/**
 	 * 执行删除
+	 * @return int 删除的行数
 	 */
 	public final function delete()
 	{
+		// 释放所有变量
 		extract($this->condition);
-		$sql = "DELETE FROM {$this->table} {$where} {$limit}";
+		// sql语句
+		$sql = "DELETE FROM {$this->table} {$where} {$order} {$limit}";
+		// 执行语句
 		$this->db->query($sql, $this->values);
+		// 清空条件子句
 		$this->setNull();
+		// 返回影响的行数
 		return $this->db->affectRow();
 	}
 
@@ -159,9 +173,10 @@ class Model
 	{
 		foreach($update as $key=>$val)
 		{
+			// 自增等系列处理
 			if(stripos($val, $key) !== FALSE)
 			{
-				foreach(array('+', '-', '*', '/') as $opeartion)
+				foreach(array('+','-','*','/','^','&','|','!') as $opeartion)
 				{
 					if(strpos($val, $opeartion))
 					{
@@ -169,25 +184,26 @@ class Model
 						break;
 					}
 				}
-
-				$set[] = "{$key}={$temp[0]}{$opeartion}:UPDATE_{$key}";
-				$this->values[":UPDATE_{$key}"] = "{$temp[1]}";
+				$set[] = "{$key}={$temp[0]}{$opeartion}:UPDATE{$key}";
+				$this->values[":UPDATE{$key}"] = $temp[1];
 			}
 			else
 			{
-				$set[] = "{$key}=:UPDATE_{$key}";
-				$this->values[":UPDATE_{$key}"] = $val;
+				// 普通赋值
+				$set[] = "{$key}=:UPDATE{$key}";
+				$this->values[":UPDATE{$key}"] = $val;
 			}
 		}
 		// set语句
 		$set = implode(',', $set);
 
-		// sql语句
+		// 释放变量
 		extract($this->condition);
-		$sql = "UPDATE {$this->table} SET {$set} {$where} {$limit}";
-
+		// sql语句
+		$sql = "UPDATE {$this->table} SET {$set} {$where} {$order} {$limit}";
 		// 执行更新
 		$this->db->query($sql, $this->values);
+		// 清空条件子句
 		$this->setNull();
 		// 返回影响行数
 		return $this->db->affectRow();
@@ -200,10 +216,15 @@ class Model
 	 */
 	public final function select($func='fetchAll')
 	{
+		// 释放变量
 		extract($this->condition);
+		// sql语句
 		$sql = "SELECT {$field} FROM {$this->table} {$where} {$group} {$having} {$order} {$limit}";
+		// 执行查询
 		$this->db->query($sql, $this->values);
+		// 清空条件子句
 		$this->setNull();
+		// 返回结果
 		return $this->db->fetch($func);
 	}
 
@@ -211,18 +232,18 @@ class Model
 	 * 统计行数
 	 * @param array where子句键值对数组
 	 * @param string 要统计的字段
-	 * @param boolean 是否输出调试语句
 	 * @return int
 	 */
-	public final function count($where=array(), $id="*", $debug=FALSE)
+	public final function count()
 	{
-		list($where, $values) = $this->where($where);
-
-		$sql = "SELECT COUNT({$id}) FROM {$this->table} {$where}";
-
+		// 释放变量
+		extract($this->condition);
+		// sql语句
+		$sql = "SELECT COUNT({$field}) FROM {$this->table} {$where} {$group} {$order} {$limit}";
+		// 执行查询
 		$this->db->query($sql, $values, $debug);
-
-		return $this->db->fetch(Mysql::FETCH_COLUMN);
+		// 返回结果
+		return $this->db->fetch(self::FETCH_COLUMN);
 	}
 
 	/**
@@ -235,8 +256,8 @@ class Model
 		$where = $data = array();
 		foreach($condition as $key=>$option)
 		{
-			// false null array() "" 0 的时候全部过滤
-			if(!$option)
+			// false null array() "" 的时候全部过滤
+			if(!$option && !is_int($option))
 			{
 				continue;
 			}
@@ -313,15 +334,22 @@ class Model
 	 */
 	private function limit($limit)
 	{
+		// 格式化成数组
 		$limit = is_array($limit) ? $limit : explode(',', $limit);
-		$offset = "";
+		
+		// 偏移量
+		$offset = NULL;
 		if((count($limit) == 2))
 		{
 			$offset = ":LIMIT_offset,";
 			$this->values[':LIMIT_offset'] = ($limit[0]-1)*$limit[1];
 		}
+
+		// 条数
 		$number = ":LIMIT_number";
 		$this->values[':LIMIT_number'] = (int)array_pop($limit);
+
+		// 保存条件
 		$this->condition["limit"] = "LIMIT {$offset}{$number}";
 	}
 

@@ -66,11 +66,18 @@ class Eny
 		list($class, $function) = D::parseUrl();
 		// 数据检查
 		V::validity();
+		echo '<pre>';
+		print_r(CLIENT_IP);
+		exit;
 		// 创建控制器
 		$controller = new $class();
+		// 控制器执行前
+		!method_exists($controller, '_init') OR  $controller->_init();
 		// 调用控制器函数
 		$controller->$function();
-	}
+		// 控制器执行后
+		!method_exists($controller, '_end') OR $controller->_end();
+ 	}
 
 	/**
 	 * 自动加载机制

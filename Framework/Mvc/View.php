@@ -56,16 +56,16 @@ class View
 	 * @var object
 	 */
 	private $rules = array(
-		'/<include\s+file="(.+)">/iU' 			=> '<?php $this->subTemplate("$1"); ?>',
-		'/<if\s+condition=(.+)>/iU'	      		=> '<?php if($1) { ?>',
-		'/<elseif\s+condition=(.+)>/' 	    	=> '<?php } elseif($1) { ?>',
-		'/<else>/iU'	      		     		=> '<?php } else { ?>',
-		'/<\/if>/iU'	      		     		=> '<?php } ?>',
-		'/<loop\s+from=(.+)\s+item=(.+)>/iU'  	=> '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
-		'/<\/loop>/iU'	      		     		=> '<?php }} ?>',
-		'/<break>/iU'	      		     		=> '<?php break; ?>',
-		'/<continue>/iU'	      	     		=> '<?php continue; ?>',
-		'/<plugin\s+action=(.+)>/iU'			=> '<?php echo $this->plugin("$1"); ?>',
+		'/<include\s+file="(.+)">/iU' => '<?php $this->subTemplate("$1"); ?>',
+		'/<if\s+condition=(.+)>/iU' => '<?php if($1) { ?>',
+		'/<elseif\s+condition=(.+)>/' => '<?php } elseif($1) { ?>',
+		'/<else>/iU' => '<?php } else { ?>',
+		'/<\/if>/iU' => '<?php } ?>',
+		'/<loop\s+from=(.+)\s+item=(.+)>/iU' => '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
+		'/<\/loop>/iU' => '<?php }} ?>',
+		'/<break>/iU' => '<?php break; ?>',
+		'/<continue>/iU' => '<?php continue; ?>',
+		'/<plugin\s+action=(.+)>/iU' => '<?php echo $this->plugin("$1"); ?>',
 		'/<const\s+item="([A-Za-z_][A-Za-z0-9_]*)">/iU'	=> '<?php echo $1; ?>',
 		'/<var\s+item="\$([a-zA-Z0-9_].*)"\s*default="(.*)">/iU' => '<?php $default="$2"; echo empty($$1) ? "$2" : $$1; ?>',
 		'/<var\s+item="\$([a-zA-Z0-9_].*)">/iU' => '<?php echo $$1 ?>',
@@ -84,7 +84,7 @@ class View
 		// 获取配置
 		$view = C::view();
 		// 模版文件
-		$this->templateDir  = VIEW.trim($view['theme'])."/";
+		$this->templateDir = VIEW.trim($view->theme)."/";
 		// 编译文件
 		$this->compileDir = COMPILE;
 		// 缓存文件
@@ -92,26 +92,26 @@ class View
 		// 插件文件
 		$this->pluginDir = PLUGIN."/View/";
 		// 视图过期时间
-		$this->expire = $view['expire'];
+		$this->expire = $view->expire;
 		// 是否真缓存
-		$this->cache = $view['cache'];
+		$this->cache = $view->cache;
 	}
 
 	/**
-	 * 真缓存直接加载文件
+	 * 是否真缓存
+	 * @param string 模版名
+	 * @param id 单页面page值
+	 * @return boolean
 	 */
-	public function isCache($tpl, $id)
+	public function isCache($tpl, $id=NULL)
 	{
 		// 模板|编译|缓存文件的绝对路径
 		$files = $this->absFiles($tpl, $id);
 		// 缓存检查
-		if($this->isExpire($files))
+		if($this->isExpire($files[0], $file[2]))
 		{
 			return FALSE;
 		}
-		// 加载文件
-		$this->display($tpl, array(), $id);
-		// 已经加载文件
 		return TRUE;
 	}
 
@@ -132,7 +132,7 @@ class View
 		// 模板|编译|缓存文件的绝对路径
 		$files = $this->absFiles($tpl, $id);
 		// 检查是否过期
-		if($this->isExpire($files))
+		if($this->isExpire($files[0], $file[2]))
 		{
 			// 编译文件
 			$content=$this->complie($files);
@@ -167,17 +167,17 @@ class View
 	 * @param  string 缓存文件
 	 * @return boolean
 	 */
-	private function isExpire($files)
+	private function isExpire($tpl, $cache)
 	{
 		$isExpire = TRUE;
 		// 编译文件是否存在
-		if(file_exists($files[2]))
+		if(file_exists($cache))
 		{
 			// 模板文件上次修改时间是否大于缓存文件的上次修改时间
-			$isExpire = filemtime($files[0]) >= filemtime($files[2]) ? TRUE : FALSE;
+			$isExpire = filemtime($tpl) >= filemtime($cache) ? TRUE : FALSE;
 
 			// 真缓存过期时间
-			if(!$isExpire && $this->cache && (filemtime($files[2]) > (time()+$this->expire)))
+			if(!$isExpire && $this->cache && (filemtime($cache) > (time()+$this->expire)))
 			{
 				$isExpire = TRUE;
 			}
@@ -214,9 +214,13 @@ class View
 	 */
 	private function write($files, $content, $cache)
 	{
-		// 编译文件写入
-		$cContent = '<?php extract($this->tplVals); ?>'.PHP_EOL.$content;
-		file_put_contents($files[1], $cContent);
+		// 编译文件是否存在
+		if(!$this->expire($files[0], $files[1]))
+		{
+			// 编译文件写入
+			$cContent = '<?php extract($this->tplVals); ?>'.PHP_EOL.$content;
+			file_put_contents($files[1], $cContent);
+		}		
 
 		// 是否要真缓存
 		if($cache)
@@ -231,22 +235,6 @@ class View
 
 		// 缓存文件写入
 		file_put_contents($files[2], $cContent);
-	}
-
-	private function includeCache($cache)
-	{
-		ob_start();
-		include($cache);
-		$content = ob_get_clean();
-
-		if($e=error_get_last())
-		{
-			exit($e['message'].' on File <b>'.$e['file'].'</b>, Line at <b>'.$e['line'].'</b>');
-		}
-		else
-		{
-			echo $content;
-		}
 	}
 
 	/**
@@ -267,6 +255,28 @@ class View
 		}
 
 		$this->includeCache($files[2]);
+	}
+
+	/**
+	 * 缓存文件加载
+	 * @param 缓存文件名
+	 * @return void
+	 */
+	private function includeCache($cache)
+	{
+		ob_start();
+		include($cache);
+		$content = ob_get_clean();
+
+		// 模版是否有误
+		if($e=error_get_last())
+		{
+			exit($e['message'].' on File <b>'.$e['file'].'</b>, Line at <b>'.$e['line'].'</b>');
+		}
+		else
+		{
+			echo $content;
+		}
 	}
 
 	/**

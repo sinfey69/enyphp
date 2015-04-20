@@ -32,10 +32,8 @@ class D
 		$routes = self::setRouter($routes);
 		// 设置调用信息
 		self::setController($routes);
-		// 真缓存检查
-		!C::view('cache') OR self::really();
 		// 返回信息
-		return array(self::$routes['class'], self::$routes['function']);
+		return array(self::$routes->class, self::$routes->function);
 	}
 
 	/**
@@ -46,10 +44,9 @@ class D
 	{
         define('IS_GET',$_SERVER['REQUEST_METHOD']=='GET');// GET请求
         define('IS_POST',$_SERVER['REQUEST_METHOD']=='POST');// POST请求
-       	//define('IS_PUT',$_SERVER['REQUEST_METHOD']=='PUT');// PUT请求
-        //define('IS_DELETE',$_SERVER['REQUEST_METHOD']=='DELETE');// DELETE请求
         define('IS_AJAX',strcasecmp($_SERVER['REQUEST_METHOD'],'xmlhttprequest'));// AJAX请求
         define('IS_MOBILE', self::isMoblie());// 是否是手机端
+        define('CLIENT_IP', self::ip()); // 设置ip地址
 	}
 
 	/**
@@ -60,13 +57,13 @@ class D
 	{
 		if(IS_CLI)
 		{
-			$routes =$_SERVER['argv'];;
+			$routes = F::server('argv');
 			array_splice($routes, 0, 1);
 		}
 		else
 		{
-			$routes = trim(F::server('PATH_INFO', NULL), '/');
-			str_replace('.'.self::$routes['suffix'], '',  $routes);
+			$routes = trim(F::server('PATH_INFO'), '/');
+			str_replace('.'.self::$routes->suffix, '',  $routes);
 			$routes = explode('/', $routes);
 		}
 
@@ -75,7 +72,7 @@ class D
 
 	/**
 	 * 设置路由的信息
-	 * @param array path_info的信息数组
+	 * @param array 来源信息数组
 	 * @return void
 	 */
 	private static function setRouter($routes)
@@ -95,7 +92,7 @@ class D
 				throw new \Exception(403);
 			}
 			// 路由设置
-			self::$routes[$val] = $routes[0];
+			self::$routes->$val = $routes[0];
 			array_splice($routes, 0, 1);
 		}
 
@@ -109,12 +106,14 @@ class D
 	 */
 	private static function setController($routes)
 	{
+		// 类名首字母大写
+		self::$routes->class = ucfirst(self::$routes->class);
 		// 定义通用文件名
-		define('REQUEST_FILE', ucfirst(self::$routes['class'])."/".self::$routes['function']);
+		define('REQUEST_FILE', self::$routes->class."/".self::$routes->function);
 		// 文件名首字母大写
-		self::$routes['class'] = '\\Controller\\'.ucfirst(self::$routes['class']);
+		self::$routes->class = '\\Controller\\'.self::$routes->class;
 		// 判断文件是否存在
-		if(!method_exists(self::$routes['class'], self::$routes['function']))
+		if(!method_exists(self::$routes->class, self::$routes->function))
 		{
 			throw new \Exception(404);
 		}
@@ -161,15 +160,25 @@ class D
 	}
 
 	/**
-	 * 真缓存直接加载文件
-	 * @return void
+	 * 获取客户端的ip地址
+	 * @return mixed 找到返回ip地址,否则返回NULL
 	 */
-	public static function really()
-	{
-		$view = new View();
-		if($view->isCache(REQUEST_FILE, (isset($_REQUEST[0]) ? "{$_REQUEST[0]}" : NULL)))
+	private static function ip()
+	{		
+		if(IS_CLI)
 		{
-			exit;
+			return '0.0.0.0';
 		}
+
+		$ip = NULL;
+		$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
+		foreach($froms as $from)
+		{
+			if($ip = getenv($from))
+			{
+				break;
+			}
+		}
+		return $ip;
 	}
 }

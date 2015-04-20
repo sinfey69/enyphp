@@ -7,34 +7,7 @@ namespace Core;
  */
 class F
 {
-	/**
-	 * 获取客户端的ip地址
-	 * @return mixed 找到返回ip地址,否则返回FALSE
-	 */
-	public static function ip()
-	{		
-		if(IS_CLI)
-		{
-			return '0.0.0.0';
-		}
 
-		$ip = NULL;
-		$froms = array(
-			'HTTP_CLIENT_IP',
-			'HTTP_X_FORWARDED_FOR',
-			'HTTP_X_FORWARDED',
-			'HTTP_FORWARDED_FOR',
-			'REMOTE_ADDR'
-		);
-		foreach($froms as $from)
-		{
-			if($ip = getenv($from))
-			{
-				break;
-			}
-		}
-		return $ip;
-	}
 
 	/**
 	 * 多语言
@@ -74,7 +47,7 @@ class F
 	 * @param  找不到值后的默认值
 	 * @return mixed 找到返回内容,否则返回第二个参数的内容
 	 */
-	public static function server($index, $defualt=FALSE)
+	public static function server($index, $defualt=NULL)
 	{
 		return empty($_SERVER[$index]) ? $defualt : addslashes($_SERVER[$index]);
 	}
@@ -91,11 +64,21 @@ class F
 		$path = trim($path, '/');
 		$dirname = dirname($path);
 		$basename = basename($path);
-		// 日志完整目录
+		// 完整目录
 		$path = sprintf('%s%s/', $abs, $dirname);
 		// 不存在目录则递归创建目录
 		is_dir($path) OR mkdir($path, 0750, TRUE);
 		// 返回文件的绝对路径
-		return sprintf("%s%s-%s.log", $path, $basename, date('Y-m-d'));
+		return sprintf("%s%s-%s", $path, $basename, date('Y-m-d'));
+	}
+
+	/**
+	 * 把数组转成对象
+	 * @param array
+	 * @return object
+	 */
+	public static function toObject($array)
+	{
+		return json_decode(json_encode($array));
 	}
 }

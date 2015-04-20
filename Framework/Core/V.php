@@ -4,15 +4,10 @@ namespace Core;
 
 /**
  * 数据检查类
+ * @author enychen
  */
 class V
 {
-	/**
-	 * 数据xml文件目录
-	 * @var string
-	 */
-	private $path;
-
 	/**
 	 * 合法数据存储数组
 	 * @var array
@@ -25,6 +20,7 @@ class V
 
 	/**
 	 * 数据合法性检查
+	 * @param string 文件名
 	 * @return void
 	 */
 	public static function validity()
@@ -34,8 +30,6 @@ class V
 		{
 			foreach($rules as $key=>$rule)
 			{
-				// 来源
-				$rule->from = "_{$rule->from}";
 				// 存在才检查
 				if(self::isExists($rule))
 				{
@@ -50,7 +44,7 @@ class V
 
 	/**
 	 * 根据文件获取规则
-	 * @return array 所有规则数组
+	 * @return array 所有规则对象数组
 	 */
 	private static function getRule()
 	{
@@ -74,6 +68,11 @@ class V
 
 			if($rule)
 			{
+				// 来源
+				$rule->from = "_{$rule->from}";
+				// 验证选项
+				$rule->options = array('options'=>array());
+				// 保存
 				$rules[] = $rule;
 			}
 		}
@@ -83,47 +82,50 @@ class V
 
 	/**
 	 * 检查值是否存在,并且是否必须
-	 * @param array 规则数组
+	 * @param object 规则对象
 	 * @return boolean 
 	 */
 	private static function isExists($rule)
 	{
 		// 不存在判断是否必须
-		if(!array_key_exists($rule->name, $GLOBALS["{$rule->from}"]))
+		if(!array_key_exists($rule->name, $GLOBALS[$rule->from]))
 		{
 			// 是否必须项
 			if(isset($rule->require))
 			{
 				throw new \Exception($rule->require);
 			}
-			// 不存在的内容设置为NULL
-			$rule->value = isset($rule->default) ? $rule->default : NULL;
+
+			// 不存在的内容设置为个NULL
+			$rule->value = isset($rule->default) ? self::setDefault($rule->default) : NULL;
+			// 保存规则
 			self::set($rule);
+
 			// 不用继续检查
 			return FALSE;
 		}
+
 		// 继续检查
 		return TRUE;
 	}
 
 	/**
 	 * 检查数据
-	 * @param array 验证规则原始数组
+	 * @param object 规则对象
+	 * @return void
 	 */
 	private static function check($rule)
 	{
 		// 来源值
-		$rule->temp = explode(',', $GLOBALS["{$rule->from}"][$rule->name]);
-		// 验证选项
-		$rule->options = array('options'=>array());
+		$rule->origin = explode(',', $GLOBALS[$rule->from][$rule->name]);
+
 		// 暂存值
 		$save = array();
-
 		// 循环遍历检查数组
-		for($i=0,$len=count($rule->temp); $i<$len; $i++)
+		for($i=0,$len=count($rule->origin); $i<$len; $i++)
 		{
 			// 设置当前要检查的值
-			$rule->value = $rule->temp[$i];
+			$rule->value = $rule->origin[$i];
 			// 规则检查
 			switch($rule->rule)
 			{
@@ -132,25 +134,22 @@ class V
 					$save[$i] = self::filterInt($rule);
 					break;
 				case "STRING":
+					// 字符串检查
 					$save[$i] = self::filterString($rule);
 					break;
 				case "REGEXP":
+					// 正则匹配
 					$save[$i] = self::filterRegexp($rule);
 					break;
 				case "EMAIL":
 				case "URL":
 				case "IP":
+					// 网络格式检查
 					$save[$i] = self::filterNetwork($rule);
 					break;
 				case "EQUALS":
 					// 匹配值
-					$save[$i] = self::filterIn($rule);
-					break;
-				case "LENGTH":
-					$save[$i] = self::filterLength($rule);
-					break;
-				case "PAGE":
-					$save[$i] = self::filterLength($rule);
+					$save[$i] = self::filterEquals($rule);
 					break;
 				case "CALLBACK":
 					$save[$i] = self::filterCallback($rule);
@@ -219,7 +218,7 @@ class V
 	/**
 	 * 过滤string数据
 	 * @param object 规则对象
-	 * return void
+	 * @return void
 	 */
 	private static function filterString($rule)
 	{
@@ -233,16 +232,15 @@ class V
 		{
 			$length = explode(',', $rule->length);
 			// 最大长度
-			if( (!empty($length[1])) && (strlen($rule->value) > $length[1]) )
+			if((!empty($length[1])) && (strlen($rule->value) > $length[1]))
 			{
 				throw new FormException($rule->prompt);
 			}
 			// 最小长度
-			if( $length[0] && (strlen($rule->value) < $length[0]) )
+			if($length[0] && (strlen($rule->value) < $length[0]))
 			{
 				throw new FormException($rule->prompt);
 			}
-
 		}
 		// 转义字符串
 		if(empty($rule->escape))
@@ -255,12 +253,12 @@ class V
 	/**
 	 * 字符串|数字匹配
 	 * @param object 规则对象
-	 * return void
+	 * @return int|string
 	 */
-	private static function filterIn($rule)
+	private static function filterEquals($rule)
 	{
-		$in = explode(',', $rule->in);
-		if(!in_array($rule->value, $in))
+		$range = explode(',', $rule->range);
+		if(!in_array($rule->value, $range))
 		{
 			throw new \Exception($rule->prompt);
 		}
@@ -270,12 +268,13 @@ class V
 	/**
 	 * 回调方法进行验证
 	 * @param object 规则对象
+	 * @return int|string
 	 */
 	private static function filterCallback($rule)
 	{
 		require_once(PLUGIN."Validate/{$rule->method}.php");
 		$result = call_user_func_array($rule->method, array($rule->value));
-		if($result === $rule->value)
+		if($result === FALSE)
 		{
 			throw new \Exception($rule->prompt);
 		}
@@ -302,24 +301,39 @@ class V
 	}
 
 	/**
+	 * 设置默认值
+	 */
+	private static function setDefault($default)
+	{
+		switch($default) 
+		{
+			case 'time':
+				return time();
+			case 'date':
+				return date('Y-m-d H:i:s');
+			default:
+				return $default;
+		}
+	}
+
+	/**
 	 * 过滤查询后设置值
 	 * @param object 检查后的规则对象
 	 * @return void
 	 */
 	private static function set($rule)
 	{
-		// 替换别名
-		$name = isset($rule->alias) ? 
-			str_replace(array(' lte', ' gte', ' lt', ' gt'), array(' <=',' >=',' <', ' >'), $rule->alias) : $rule->name;
+		// 替换别名, xml无法解析<,不知道为何
+		$name = isset($rule->alias) ? str_replace(array(' lte',' lt'), array(' <=',' <'), $rule->alias) : $rule->name;
 		// 替换来源
-		$from = isset($rule->to) ? "_{$rule->to}" : $rule->from;
+		$from = isset($rule->move) ? "_{$rule->move}" : $rule->from;
 		// 格式化数据
 		$value = isset($rule->format) ? str_replace(":{$name}", $rule->value, $rule->format) : $rule->value;
 
 		// 设置值
 		if(isset($rule->aggregate))
 		{
-		 	foreach(explode(':', $rule->aggregate) as $key)
+		 	foreach(explode(',', $rule->aggregate) as $key)
 		 	{
 		 		self::$valid[$from][$key][$name] = $value;
 		 	}

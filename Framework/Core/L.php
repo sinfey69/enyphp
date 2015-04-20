@@ -54,7 +54,7 @@ class L
 	private static function write($file, $content)
 	{
 		// 目录是否存在
-		$file = F::absFile($file, LOG);
+		$file = F::absFile("{$file}.log", LOG);
 
 		// 日志记录
 		file_put_contents($file, $content, FILE_APPEND);
