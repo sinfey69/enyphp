@@ -11,6 +11,6 @@ class Test extends Model
 	{
 		echo $this->field(['id,name','sex','email'])
 			 ->where(['id'=>8])
-			 ->update(['sex'=>'1']));
+			 ->update(['sex'=>'1']);
 	}
 }
