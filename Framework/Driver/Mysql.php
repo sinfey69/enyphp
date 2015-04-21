@@ -40,25 +40,28 @@ class Mysql
 	/**
 	 * 构造函数
 	 * @param array 配置对象数组
+	 * @return void
 	 */
 	private final function __construct($drivers)
 	{
 		// 保存配置信息
 		$this->drivers = $drivers;
+		// 默认创建第一个数据库连接
+		$this->changeDb();
 	}
 
 	/**
 	 * 禁止执行克隆
+	 * @return void
 	 */
 	private final function __clone(){}
 
 	/**
 	 * 创建数据库实例
-	 * @param array 配置对象信息
-	 * @param int 当前要创建的数据库编号
-	 * @return object 当前对象
+	 * @param array 配置对象数组	
+	 * @return \Driver\Mysql
 	 */
-	public static function instance($drivers, $key=0)
+	public static function instance(array $drivers)
 	{
 		if(!self::$instance)
 		{
@@ -69,10 +72,39 @@ class Mysql
 	}
 
 	/**
+	 * 切换数据库
+	 * @param int 数据库编号
+	 * @return void
+	 */
+	public function changeDb($key=0)
+	{
+		// 已经创建则切换
+		if(isset($this->map[$key]))
+		{
+			$this->pdo = $this->map[$key];
+		}
+		else
+		{
+			// 获取配置对象
+			$driver = $this->drivers[$key];
+			// 数据库连接信息
+			$dsn = "mysql:host={$driver->host};port={$driver->port};dbname={$driver->dbname};charset={$driver->charset}";
+			// 驱动选项
+			$option = array(
+					\PDO::ATTR_CASE=>\PDO::CASE_LOWER,// 所有字段小写
+					\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_WARNING,// 如果出现错误抛出错误警告
+					\PDO::ATTR_ORACLE_NULLS=>\PDO::NULL_TO_STRING,// 把所有的NULL改成""
+					\PDO::ATTR_TIMEOUT=>30// 超时时间
+			);
+			// 创建数据库驱动对象
+			$this->pdo = $this->map[$key] = new \Pdo($dsn, $driver->user, $driver->password, $option);
+		}
+	}
+
+	/**
 	 * 执行sql查询
 	 * @param string sql语句
 	 * @param array 参数数组
-	 * @param boolean 是否输出调试语句
 	 * @return void
 	 */
 	public function query($sql, $params=array())
@@ -87,37 +119,6 @@ class Mysql
 		$this->stmt->execute();
 		// 设置解析模式
 		$this->stmt->setFetchMode(\PDO::FETCH_CLASS, 'stdClass');
-	}
-
-	/**
-	 * 切换数据库
-	 * @param string 主从key
-	 * @return void
-	 */
-	public function changeDb($key)
-	{
-		extract($this->drivers[$key]);
-		// key键
-		$key = md5("{$host}:{$port}:{$dbname}");
-
-		// 已经创建则切换
-		if(isset($this->map[$key]))
-		{
-			$this->pdo = $this->map[$key];
-			return;
-		}
-
-		// 数据库连接信息
-		$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
-		// 驱动选项
-		$option = array(
-				\PDO::ATTR_CASE=>\PDO::CASE_LOWER,// 所有字段小写
-				\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_WARNING,// 如果出现错误抛出错误警告
-				\PDO::ATTR_ORACLE_NULLS=>\PDO::NULL_TO_STRING,// 把所有的NULL改成""
-				\PDO::ATTR_TIMEOUT=>30
-		);
-		// 创建数据库驱动对象
-		$this->pdo = $this->map[$key] = new \Pdo($dsn, $user, $password, $option);
 	}
 
 	/**
@@ -150,48 +151,31 @@ class Mysql
 	}
 
 	/**
-	 * 解析数据库查询资源
-	 * @param string  fetchAll | fetch | fetchColumn
-	 * @return mixed  查询得到返回数组或字符串,否则返回false或空数组
+	 * 简单回调pdo对象方法
+	 * @param string 函数名
+	 * @param array 参数数组
+	 * @return mixed
 	 */
-	public function fetch($func='fetchAll')
+	public function __call($method, $args)
 	{
-		// 执行释放
-		$result = $this->stmt->$func();
-		unset($this->stmt);
-		return $result;
-	}
+		switch($method)
+		{
+			case "lastInsertId":
+				$result = $this->pdo->lastInsertId();
+				break;
+			case "rowCount":
+			case "fetchAll":
+			case "fetch":
+			case "fetchRow":
+				$result = $this->stmt->$method();
+				break;
+			default:
+				trigger_error("NOT FOUND Mysql::{$method}");
+		}
 
-	/**
-	 * 获取上次插入的id
-	 * @return int 
-	 */
-	public function lastInsertId()
-	{
-		$result = $this->pdo->lastInsertId();
+		// 删除结果集
 		unset($this->stmt);
-		return $result;
-	}
-
-	/**
-	 * 返回插入|更新|删除影响的行数
-	 * @return int 
-	 */
-	public function affectRow()
-	{
-		$result = $this->stmt->rowCount();
-		unset($this->stmt);
-		return $result;
-	}
-
-	/**
-	 * 返回结果集中的行数
-	 * @return int
-	 */
-	public function resourceCount()
-	{
-		$result = $this->stmt->columnCount();
-		unset($this->stmt);
+		// 返回结果
 		return $result;	
 	}
 
@@ -207,7 +191,6 @@ class Mysql
 			{
 				$d = "\\{$d}\\";
 			}
-
 			$sql = str_replace($key, $d, $sql);
 		}
 		

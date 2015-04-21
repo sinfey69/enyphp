@@ -16,6 +16,7 @@ abstract class Controller
 
 	/**
 	 * 构造函数
+	 * @return void
 	 */
 	public final function __construct()
 	{

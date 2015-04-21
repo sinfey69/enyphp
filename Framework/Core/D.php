@@ -64,7 +64,7 @@ class D
 		{
 			$routes = trim(F::server('PATH_INFO'), '/');
 			str_replace('.'.self::$routes->suffix, '',  $routes);
-			$routes = explode('/', $routes);
+			$routes = $routes ? explode('/', $routes) : array();
 		}
 
 		return $routes;
@@ -117,6 +117,7 @@ class D
 		{
 			throw new \Exception(404);
 		}
+
 		// url请求参数设置到$_REQUEST;
 		$_REQUEST = $routes;
 	}

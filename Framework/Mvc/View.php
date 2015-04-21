@@ -56,19 +56,19 @@ class View
 	 * @var object
 	 */
 	private $rules = array(
-		'/<include\s+file="(.+)">/iU' => '<?php $this->subTemplate("$1"); ?>',
-		'/<if\s+condition=(.+)>/iU' => '<?php if($1) { ?>',
-		'/<elseif\s+condition=(.+)>/' => '<?php } elseif($1) { ?>',
-		'/<else>/iU' => '<?php } else { ?>',
-		'/<\/if>/iU' => '<?php } ?>',
-		'/<loop\s+from=(.+)\s+item=(.+)>/iU' => '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
-		'/<\/loop>/iU' => '<?php }} ?>',
-		'/<break>/iU' => '<?php break; ?>',
-		'/<continue>/iU' => '<?php continue; ?>',
-		'/<plugin\s+action=(.+)>/iU' => '<?php echo $this->plugin("$1"); ?>',
-		'/<const\s+item="([A-Za-z_][A-Za-z0-9_]*)">/iU'	=> '<?php echo $1; ?>',
-		'/<var\s+item="\$([a-zA-Z0-9_].*)"\s*default="(.*)">/iU' => '<?php $default="$2"; echo empty($$1) ? "$2" : $$1; ?>',
-		'/<var\s+item="\$([a-zA-Z0-9_].*)">/iU' => '<?php echo $$1 ?>',
+		'/<!--{include\s+(.+)}-->/iU' => '<?php $this->subTemplate("$1"); ?>',
+		'/<!--{if\s+(.+)}-->/iU' => '<?php if($1) { ?>',
+		'/<!--{elseif\s+(.+)}-->/' => '<?php } elseif($1) { ?>',
+		'/<!--{else}-->/iU' => '<?php } else { ?>',
+		'/<!--{\/if}-->/iU' => '<?php } ?>',
+		'/<!--{loop\s+(.+)\s+(.+)}-->/iU' => '<?php if(is_array($1)) {foreach($1 as $index=>$2) { ?>',
+		'/<!--{\/loop}-->/iU' => '<?php }} ?>',
+		'/<!--{break}-->/iU' => '<?php break; ?>',
+		'/<!--{continue}-->/iU' => '<?php continue; ?>',
+		'/<!--{plugin\s+(.+)}-->/iU' => '<?php echo $this->plugin("$1"); ?>',
+		'/<!--{([A-Z_][A-Z0-9_]*)}-->/iU'	=> '<?php echo $1; ?>',
+		'/<!--{\$([a-zA-Z0-9_].*)\s+"(.+)"}-->/iU' => '<?php echo empty($$1) ? "$2" : $$1; ?>',
+		'/<!--{\$([a-zA-Z0-9_].*)}-->/iU' => '<?php echo $$1 ?>',
 	);
 
 	/**
@@ -105,14 +105,16 @@ class View
 	 */
 	public function isCache($tpl, $id=NULL)
 	{
-		// 模板|编译|缓存文件的绝对路径
-		$files = $this->absFiles($tpl, $id);
-		// 缓存检查
-		if($this->isExpire($files[0], $file[2]))
+		if($this->cache)
 		{
-			return FALSE;
+			// 模板|编译|缓存文件的绝对路径
+			$files = $this->absFiles($tpl, $id);
+			// 缓存检查
+			if(!$this->isExpire($files[0], $files[2]))
+			{
+				exit($this->display($tpl));
+			}
 		}
-		return TRUE;
 	}
 
 	/**
@@ -132,7 +134,7 @@ class View
 		// 模板|编译|缓存文件的绝对路径
 		$files = $this->absFiles($tpl, $id);
 		// 检查是否过期
-		if($this->isExpire($files[0], $file[2]))
+		if($this->isExpire($files[0], $files[2]))
 		{
 			// 编译文件
 			$content=$this->complie($files);
@@ -214,11 +216,12 @@ class View
 	 */
 	private function write($files, $content, $cache)
 	{
+		// 编译文件写入
+		$cContent = '<?php extract($this->tplVals); ?>'.PHP_EOL.$content;
+
 		// 编译文件是否存在
-		if(!$this->expire($files[0], $files[1]))
+		if($this->isExpire($files[0], $files[1]))
 		{
-			// 编译文件写入
-			$cContent = '<?php extract($this->tplVals); ?>'.PHP_EOL.$content;
 			file_put_contents($files[1], $cContent);
 		}		
 
@@ -246,7 +249,7 @@ class View
 		// 子模板文件
 		$files = $this->absFiles($subTpl);
 		// 模版类
-		if($this->isExpire($files))
+		if($this->isExpire($files[0], $files[2]))
 		{
 			// 编译文件
 			$content=$this->complie($files);
@@ -271,7 +274,7 @@ class View
 		// 模版是否有误
 		if($e=error_get_last())
 		{
-			exit($e['message'].' on File <b>'.$e['file'].'</b>, Line at <b>'.$e['line'].'</b>');
+			trigger_error($e['message']);
 		}
 		else
 		{
@@ -283,8 +286,8 @@ class View
 	 * 插件机制
 	 * @param string 插件
 	 */
-	private function plugin()
+	private function plugin($source)
 	{
-
+		
 	}
 }

@@ -1,22 +1,28 @@
 <?php
 
-use \core\ModelBase;
+namespace Extend;
 
-class DomainAuction extends ModelBase
+class Concurrent
 {
-	protected $table = "domain_auction";
+	/**
+	 * 加锁文件数组
+	 * @var array
+	 */
+	private static $lock = array();
 
 	/**
-	 * 这是一个函数
-	 * @param string 参数说明1
-	 * @param int    参数说明2
-	 * @return void
-	 * @return array 包含啥key的值
+	 * 加锁
 	 */
-	public function funcName($domain, $num)
+	public static function lock($file)
 	{
-		$sql = "SELECT * FROM {$this->table} WHERE domainname=:domainname ORDER BY FinishDate DESC limit 0,{$num}";
-		$this->db->query($sql, array(":domainname"=>$domain));
-		return $this->db->fetch(self::FETCH_ROW); // FETCH_ALL FETCH_COLUMN;
+
+	}
+
+	/**
+	 * 解锁
+	 */
+	public static function unlock()
+	{
+
 	}
 }

@@ -2,10 +2,14 @@
 
 namespace Common;
 
+/**
+ * 头信息输出
+ */
 class Header
 {
 	/**
 	 * 允许跨域设置cookie
+	 * @return void
 	 */
 	public static function P3P()
 	{
@@ -13,26 +17,20 @@ class Header
 	}
 
 	/**
-	 * 设置字符集
-	 */
-	public static function contentType()
-	{
-		header('Content-Type: text/html;charset=UTF-8');
-	}
-
-	/**
 	 * 页面跳转
 	 * @param string 跳转地址
+	 * @return void
 	 */
 	public static function location($url)
 	{
-		header("Location: {$url}");
+		header("Location: /{$url}");
 	}
 
 	/**
 	 * 缓存控制
+	 * @return void
 	 */
-	public function cacheControl()
+	public static function cacheControl()
 	{
 		header('Cache-Control:private, max-age=0, no-cache, must-revalidate, no-cache=Set-Cookie, proxy-revalidate');
 	}

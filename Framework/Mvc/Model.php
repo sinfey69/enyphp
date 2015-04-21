@@ -30,7 +30,7 @@ class Model
 	 * 返回影响的行数
 	 * @var string
 	 */
-	const FETCH_AFFECTROW = 'affectRow';
+	const FETCH_AFFECTROW = 'rowCount';
 
 	/**
 	 * 表名
@@ -71,7 +71,7 @@ class Model
 	public function __construct($key='mysql')
 	{
 		// 读取配置
-		$driver = \Core\Config::G($key);
+		$driver = \Core\C::G($key);
 		// 创建数据库
 		$this->db = Mysql::instance($driver);
 	}
@@ -225,7 +225,7 @@ class Model
 		// 清空条件子句
 		$this->setNull();
 		// 返回结果
-		return $this->db->fetch($func);
+		return $this->db->$func();
 	}
 
 	/**
@@ -332,7 +332,7 @@ class Model
 	 * @param string|array|int 分页信息
 	 * @return void
 	 */
-	private function limit($limit)
+	private final function limit($limit)
 	{
 		// 格式化成数组
 		$limit = is_array($limit) ? $limit : explode(',', $limit);
@@ -341,13 +341,13 @@ class Model
 		$offset = NULL;
 		if((count($limit) == 2))
 		{
-			$offset = ":LIMIT_offset,";
-			$this->values[':LIMIT_offset'] = ($limit[0]-1)*$limit[1];
+			$offset = ":LIMITO,";
+			$this->values[':LIMITO'] = ($limit[0]-1)*$limit[1];
 		}
 
 		// 条数
-		$number = ":LIMIT_number";
-		$this->values[':LIMIT_number'] = (int)array_pop($limit);
+		$number = ":LIMITN";
+		$this->values[':LIMITN'] = (int)array_pop($limit);
 
 		// 保存条件
 		$this->condition["limit"] = "LIMIT {$offset}{$number}";

@@ -1,25 +1,9 @@
-<include file="Common/header">
+<!--{include Common/header}-->
 <body>
-	<h1>短网址生成</h1>
+	<h1>测试模版</h1>
 	<form method="">
 		<input type="text" name="origin" id="origin">
 		<input type="button" id="shorturl" value="生成">
 	</form>
-	<p id="url"></p>
-	<script type="text/javascript">
-		$('#shorturl').click(function() {
-			$.ajax({
-				url:'welcome/create',
-				type:'post',
-				data:'origin='+$('#origin').val(),
-				dataType:'json',
-				success:function(data) {
-					console.log(data);
-					var anchor = "<a href='/welcome/origin/"+ data.url +"'>点击这</a>";
-					$('#url').html(anchor);
-				}
-			});
-		});
-	</script>
 </body>
-<include file="Common/footer">
+<!--{include Common/footer}-->
