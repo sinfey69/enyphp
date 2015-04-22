@@ -18,12 +18,15 @@ class Session extends Model
 	 */
 	public function open($path, $name)
 	{
-		// 执行插入或替换
-		$sql = "REPLACE INTO {$this->table} SET session_id=:id, ip=:ip, lastDate=:date";
-		// sql语句执行
-		$this->db->query($sql, array(':id'=>session_id(), 'ip'=>CLIENT_IP, ':date'=>time()));
-		// 返回影响行数
-		return $this->db->rowCount();
+		if(session_id())
+		{
+			// 执行插入或替换
+			$sql = "REPLACE INTO {$this->table} SET session_id=:id, ip=:ip, lastDate=:date";
+			// sql语句执行
+			$this->db->query($sql, array(':id'=>session_id(), 'ip'=>CLIENT_IP, ':date'=>time()));
+			// 返回影响行数
+			return $this->db->rowCount();
+		}
 	}
 
 	/**
@@ -41,7 +44,10 @@ class Session extends Model
 	 */
 	public function read($id)
 	{
-		return $this->field('data')->where(array('session_id'=>$id))->select(self::FETCH_ROW);
+		if($id)
+		{
+			return $this->field('data')->where(array('session_id'=>$id))->select(self::FETCH_ROW);
+		}
 	}
 
 	/**
@@ -51,7 +57,10 @@ class Session extends Model
 	 */
 	public function write($id, $data)
 	{
-		return $this->where(array('session_id'=>$id))->update(array('data'=>$data));
+		if($id)
+		{
+			return $this->where(array('session_id'=>$id))->update(array('data'=>$data));
+		}
 	}
 
 	/**
@@ -71,5 +80,15 @@ class Session extends Model
 	public function gc()
 	{
 		return $this->where(array('session_id'=>$id))->limit(1)->delete();
+	}
+
+	/**
+	 * 删除过期的key
+	 * @param int 比较的时间点
+	 * @return int
+	 */
+	public function expire($time)
+	{
+		return $this->where(array('lastDate <'=>$time))->delete();
 	}
 }

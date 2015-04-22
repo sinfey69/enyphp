@@ -29,6 +29,7 @@ class Session
 			case 'memcached':
 				ini_set('session.save_handler', $config->handler);
 				$config->path = "tcp://{$config->path}";
+			case 'files':
 			case 'memcache':
 				ini_set('session.save_path', $config->path);
 				break;
@@ -43,6 +44,8 @@ class Session
 					array(self::$model,'destroy'),
 					array(self::$model,'gc')	
 				);
+				// 过期session删除
+				self::$model->expire(time()-$config->expire);
 				break;
 		}
 		// 设置过期时间
