@@ -116,9 +116,16 @@ class Mysql
 		// 输出调试
 		!defined('SQL_ECHO') OR $this->debug($sql, $params);
 		// 执行一条sql语句
-		$this->stmt->execute();
-		// 设置解析模式
-		$this->stmt->setFetchMode(\PDO::FETCH_CLASS, 'stdClass');
+		if($this->stmt->execute())
+		{
+			// 设置解析模式
+			$this->stmt->setFetchMode(\PDO::FETCH_CLASS, 'stdClass');	
+		}
+		else
+		{
+			// 抛出一个pdo错误
+			throw new \PDOException($this->stmt->errorInfo()[2]);
+		}
 	}
 
 	/**
