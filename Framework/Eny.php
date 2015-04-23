@@ -9,8 +9,8 @@ use \Core\C;
 use \Core\D;
 use \Core\H;
 use \Core\L;
+use \Core\S;
 use \Core\V;
-use \Controller\_Empty;
 
 class Eny
 {
@@ -36,30 +36,34 @@ class Eny
 		define('FONT',DATA.'Font/');// 字体目录
 		define('FILE',DATA.'File/');// 文件目录
 		define('LOCK',DATA.'Lock/');// 锁机制目录
+		define('SESSION',DATA.'Session/');// session文件目录
 
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
-        define('IS_CLI',!strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
+        define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
 
         // 系统环境设置
+        IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
 		date_default_timezone_set('PRC');// 日期设置
-		set_exception_handler('Eny::appException');// 自定义异常机制
 		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
-		DEBUG OR set_error_handler('Eny::appError');// 自定义错误机制
-		DEBUG OR register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
-		DEBUG OR error_reporting(0);// 关闭报错
-		DEBUG OR ini_set('display_errors','off');// 关闭报错
-		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
-
+		if(!DEBUG)
+		{
+			set_exception_handler('Eny::appException');// 自定义异常机制
+			set_error_handler('Eny::appError');// 自定义错误机制
+			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
+			error_reporting(0);// 关闭报错
+			ini_set('display_errors','off');// 关闭报错
+		}
+		
 		// 程序运行
-		self::run();
+		self::application();
 	}
 
 	/**
 	 * 程序执行
 	 * @return void
 	 */
-	private static function run()
+	private static function application()
 	{
 		// 程序开始之前前	
 		H::run('prevSystem');
@@ -69,6 +73,8 @@ class Eny
 		list($class, $function) = D::parseUrl();
 		// 数据检查
 		V::validity();
+		// session初始化
+		//S::initialize();
 		// 控制器创建钱
 		H::run('prevController');
 		// 创建控制器
@@ -122,11 +128,9 @@ class Eny
 		$const = array_search($errno, get_defined_constants());
 		$const = $const ? : $errno;
 		// 错误转向
-		L::systemError($errno, $errstr, $errfile, $errline);
+		L::error($errno, $errstr, $errfile, $errline);
 		// 抛出500服务器错误
-		_Empty::_500();
-		// 结束程序
-		exit;
+		header("Location: /50x.html");
 	}	
 
 	/**
@@ -136,34 +140,7 @@ class Eny
 	 */
 	public static function appException($e)
 	{
-		switch(get_class($e))
-		{
-			case "Exception":
-				// 正常的错误提示
-				switch($e->getMessage())
-				{
-					case 403:
-						// 禁止操作
-						_Empty::_403();
-						break;
-					case 404:
-						// 找不到页面
-						_Empty::_404();
-						break;
-					default:
-						_Empty::_E($e->getMessage(), $e->getCode());
-				}
-				break;
-			default:
-				if(DEBUG)
-				{
-					exit($e->getMessage().' on File <b>'.$e->getFile().'</b>, Line at <b>'.$e->getLine().'</b>');
-				}
-				else
-				{
-					self::appError('E_EXCEPTION', $e->getMessage(), $e->getFile(), $e->getLine());
-				}
-		}
+		self::appError('E_EXCEPTION', $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
 	/**
@@ -189,4 +166,3 @@ class Eny
 		}
 	}
 }
-

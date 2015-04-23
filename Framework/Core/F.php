@@ -7,7 +7,23 @@ namespace Core;
  */
 class F
 {
+	/**
+	 * 错误跳转
+	 * @param string
+	 */
+	const REDIRECT_ERROR = 'error';
 
+	/**
+	 * 警告跳转
+	 * @param string
+	 */
+	const REDIRECT_WARNING = 'warning';
+
+	/**
+	 * 正确跳转
+	 * @param string
+	 */
+	const REDIRECT_SUCCESS = 'success';
 
 	/**
 	 * 多语言
@@ -80,5 +96,36 @@ class F
 	public static function toObject($array)
 	{
 		return json_decode(json_encode($array));
+	}
+
+	/**
+	 * 操作提示跳转
+	 * @param string 错误信息
+	 * @param mixed 跳转地址,可以自定义成array('url'=>title)形式
+	 */
+	public static function redirect($type, $message, $url=NULL)
+	{
+		// 操作类型
+		$data['type'] = $type;
+		// 提示信息
+		$data['message'] = $message;
+		// 跳转地址
+		switch(TRUE)
+		{
+			case is_array($url):
+				$data['url'] = $url;
+				$data['autoback'] = FALSE;
+				break;
+			case is_null($url):
+				$url = F::server('HTTP_REFERER', self::server('HTTP_HOST'));
+			default:
+				$data['url'] = array($url=>'5秒后自动返回.如果没有成功,请点击此处');
+				$data['autoback'] = TRUE;
+		}
+
+		// 加载模版
+		$view = new \Mvc\View();
+		$view->display("common/{$type}", $data, NULL, FALSE);
+		exit;
 	}
 }

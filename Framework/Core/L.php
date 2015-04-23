@@ -15,7 +15,7 @@ class L
 	 * @param int 错误发生信息
 	 * @return void
 	 */
-	public static function systemError($code, $message, $file, $line)
+	public static function error($code, $message, $file, $line)
 	{
 		// 错误整理
 		$error = array('TYPE'=>$code, 'MESSAGE'=>$message, 'FILE'=>$file, 'LINE'=>$line);

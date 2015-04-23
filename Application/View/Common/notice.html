@@ -1,0 +1,10 @@
+<!--{include Common/header}-->
+<body>
+	<h1><!--{$type}-->：<!--{$message}--></h1>
+	<div>
+		<!--{loop $url $uri}-->
+			<a target="target" href="http://<!--{$index}-->"><!--{$uri}--></a>
+		<!--{/loop}-->
+	</div>
+</body>
+<!--{include Common/footer}-->

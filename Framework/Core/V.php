@@ -93,7 +93,7 @@ class V
 			// 是否必须项
 			if(isset($rule->require))
 			{
-				throw new \Exception($rule->require);
+				self::throwError($rule->require);
 			}
 
 			// 不存在的内容设置为个NULL
@@ -225,7 +225,7 @@ class V
 		// 字符串xss检查
 		if(preg_match('/(<script|<iframe|<link|<frameset|<vbscript|<form)/i', $rule->value))
 		{
-			throw new \Exception($rule->prompt);
+			self::throwError($rule->prompt);
 		}
 		// 字符串长度检查
 		if(isset($rule->length))
@@ -234,12 +234,12 @@ class V
 			// 最大长度
 			if((!empty($length[1])) && (strlen($rule->value) > $length[1]))
 			{
-				throw new FormException($rule->prompt);
+				self::throwError($rule->prompt);
 			}
 			// 最小长度
 			if($length[0] && (strlen($rule->value) < $length[0]))
 			{
-				throw new FormException($rule->prompt);
+				self::throwError($rule->prompt);
 			}
 		}
 		// 转义字符串
@@ -260,7 +260,7 @@ class V
 		$range = explode(',', $rule->range);
 		if(!in_array($rule->value, $range))
 		{
-			throw new \Exception($rule->prompt);
+			self::throwError($rule->prompt);
 		}
 		return $rule->value;
 	}
@@ -276,7 +276,7 @@ class V
 		$result = call_user_func_array($rule->method, array($rule->value));
 		if($result === FALSE)
 		{
-			throw new \Exception($rule->prompt);
+			self::throwError($rule->prompt);
 		}
 		// 设置值
 		return $result;
@@ -294,7 +294,7 @@ class V
 		// 错误抛出
 		if($result === FALSE)
 		{
-			throw new \Exception($rule->prompt);
+			self::throwError($rule->prompt);
 		}
 		// 设置值
 		return $result;
@@ -354,5 +354,15 @@ class V
 		{
 			$GLOBALS[$key] = $global;
 		}
+	}
+
+	/**
+	 * 错误抛出
+	 * @param string 错误信息
+	 * @return void
+	 */
+	private static function throwError($message)
+	{
+		F::redirect(F::REDIRECT_ERROR, $message);
 	}
 }

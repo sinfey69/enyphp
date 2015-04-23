@@ -2,8 +2,6 @@
 
 namespace Core;
 
-use \Mvc\View;
-
 /**
  * 路由分析类
  * @author Eny
@@ -89,7 +87,7 @@ class D
 			if(!preg_match('/^([a-z])+$/', $routes[0])) 
 			{
 				// 禁止操作
-				throw new \Exception(403);
+				header("Location:/40x.html");
 			}
 			// 路由设置
 			self::$routes->$val = $routes[0];
@@ -115,7 +113,7 @@ class D
 		// 判断文件是否存在
 		if(!method_exists(self::$routes->class, self::$routes->function))
 		{
-			throw new \Exception(404);
+			header("Location:/40x.html");
 		}
 
 		// url请求参数设置到$_REQUEST;
