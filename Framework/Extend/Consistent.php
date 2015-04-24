@@ -1,10 +1,8 @@
 <?php
 
 /**
- * 分布式计算hash值
+ * 分布式
  */
-namespace Extend;
-
 class Consistent
 {
 	/**
@@ -23,16 +21,23 @@ class Consistent
 	 * 虚拟节点数量
 	 * @var int
 	 */
-	protected static $nodeNumber  = 64;
-	
+	protected static $virtual  = 64;
+
 	/**
-	 * 计算哈希值
-	 * @param string 
-	 * @return int
+	 * 静态存储方式
+	 * @param string 方法名
+	 * @param array 参数
 	 */
-	public static function hash($value)
+	public static function __callStatic($method, $args)
 	{
-		return sprintf("%u", crc32($value));
+		// 计算哈希值
+		$point = self::hash($args[0]);
+
+		// 选择某一台缓存服务器
+		$object = self::lookup($point);
+
+		// 执行回调函数
+		return call_user_func_array(array($object, $method), $args);
 	}
 	
 	/**
@@ -40,10 +45,9 @@ class Consistent
 	 * @param string 键
 	 * @return object 节点对象
 	 */
-	public static function lookup($key)
+	public static function lookup($point)
 	{
-		// 计算节点数
-		$point = self::hash($key);
+		echo $point,'<hr/>';
 		// 默认第一个节点
 		$node = current(self::$nodes);
 		// 获取区间节点
@@ -55,11 +59,36 @@ class Consistent
 				break;
 			}
 		}
+
+		echo $node,'<hr/>';
 		
 		// 获取对应的对象
-		return $this->nodes[$node];
+		return self::$nodes[$node];
 	}
 	
+	/**
+	 * 增加节点
+	 * @param string 节点key
+	 * @param object 节点对象
+	 * @return void
+	 */
+	public static function addNode($node, $object)
+	{
+		// 引入虚拟节点降低服务器压力
+		for($i=0; $i<self::$virtual; $i++)
+		{
+			if(array_key_exists(self::hash("{$node}_$i"), self::$position))
+			{
+				return;
+			}
+			self::$position[self::hash("{$node}_$i")] = $node;
+		}
+		// 当前节点保存服务器对象self::$position
+		self::$nodes[$node] = $object;
+		// 排序节点
+		ksort(self::$position, SORT_REGULAR);
+	}
+
 	/**
 	 * 节点失效后删除所有虚拟节点
 	 * @param string 节点哈希值
@@ -67,36 +96,19 @@ class Consistent
 	 */
 	public static function delNode($node)
 	{
-		for($i=0; $i<self::$nodeNumber; $i++)
+		for($i=0; $i<self::$virtual; $i++)
 		{
 			unset(self::$position[self::hash("{$node}_$i")]);
 		}
 	}
-	
+
 	/**
-	 * 增加节点
-	 * @param string 节点key
-	 * @param object 节点对象
-	 * @reutrn void
+	 * 计算哈希值
+	 * @param string 
+	 * @return int
 	 */
-	public static function addNode($node, $object)
+	private static function hash($value)
 	{
-		for($i=0; $i<self::$nodeNumberi; $i++)
-		{
-			self::$position[self::hash("{$node}_$i")] = $node;
-		}
-		
-		self::$nodes[$node] = $object;
-		
-		self::sortNode();
-	}
-	
-	/**
-	 * 节点排序
-	 * @return void
-	 */
-	protected static function sortNode()
-	{
-		ksort(self::$position, SORT_REGULAR);
+		return sprintf("%u", crc32($value));
 	}
 }
