@@ -1,18 +1,18 @@
 <?php
 
+# 核心库
+use \Core\C, 	// 配置类
+	\Core\D,	// 路由类
+	\Core\F,	// 全局方法类
+	\Core\H,	// 钩子类
+	\Core\L,	// 日志类
+	\Core\S,	// session类
+	\Core\V;	// 验证类
+
 /**
  * 核心框架类
  * @author Eny
  */
-
-use \Core\C;
-use \Core\D;
-use \Core\F;
-use \Core\H;
-use \Core\L;
-use \Core\S;
-use \Core\V;
-
 class Eny
 {
 	/**
@@ -75,7 +75,7 @@ class Eny
 		// 数据检查
 		V::validity();
 		// session初始化
-		//S::initialize();
+		S::initialize();
 		// 控制器创建钱
 		H::run('prevController');
 		// 创建控制器
@@ -160,7 +160,6 @@ class Eny
 				case E_COMPILE_ERROR:
 				case E_USER_ERROR:  
 					ob_end_clean();
-					// 日志记录
 					self::appError($e['type'], $e['message'], $e['file'], $e['line']);
 					break;
 			}

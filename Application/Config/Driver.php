@@ -18,11 +18,11 @@ $config['mysql'][0]['dbname'] = "test";
  * 可以配置多个redis,3.0之前得手动集群,暂不实现
  * $config['redis'][redis配置选项]
  */
-$config['reids']['host'] = "192.168.200.92";
-$config['redis']['port'] = 6379;
-$config['redis']['db'] = 0;
-$config['redis']['timeout'] = 3;
-$config['redis']['password'] = "";
+$config['redis'][0]['host'] = "192.168.200.92";
+$config['redis'][0]['port'] = 6379;
+$config['redis'][0]['db'] = 0;
+$config['redis'][0]['timeout'] = 3;
+$config['redis'][0]['password'] = "";
 
 /**
  * memcached配置

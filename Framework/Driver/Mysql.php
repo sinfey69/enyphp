@@ -92,7 +92,7 @@ class Mysql
 			// 驱动选项
 			$option = array(
 					\PDO::ATTR_CASE=>\PDO::CASE_LOWER,// 所有字段小写
-					\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_WARNING,// 如果出现错误抛出错误警告
+					\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION,// 如果出现错误抛出错误警告
 					\PDO::ATTR_ORACLE_NULLS=>\PDO::NULL_TO_STRING,// 把所有的NULL改成""
 					\PDO::ATTR_TIMEOUT=>30// 超时时间
 			);
@@ -188,17 +188,20 @@ class Mysql
 
 	/**
 	 * 输出预绑定sql和参数列表
+	 * @param string 预处理sql语句
+	 * @param array 数据
 	 * @return void
 	 */
 	public function debug($sql, $data)
 	{
-		foreach($data as $key=>$d)
+		foreach($data as $key=>$placeholder)
 		{
-			if(is_string($d))
-			{
-				$d = "\\{$d}\\";
-			}
-			$sql = str_replace($key, $d, $sql);
+			// 字符串加上引号
+			!is_string($placeholder) OR ($placeholder = "'{$placeholder}'");
+			// 替换
+			$start = strpos($sql, $key);
+			$end = strlen($key);
+			$sql = substr_replace($sql, $placeholder, $start, $end);
 		}
 		
 		echo $sql;

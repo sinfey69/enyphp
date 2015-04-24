@@ -27,9 +27,9 @@ class S
 			case 'redis':
 			case 'memcached':
 				ini_set('session.save_handler', $config->handler);
-				$config->path = "tcp://{$config->path}";
+				$driver = C::G($config->handler, $config->path);
+				$config->path = "tcp://{$driver->host}:{$driver->port}";
 			case 'files':
-			case 'memcache':
 				ini_set('session.save_path', $config->path);
 				break;
 			case 'mysql':

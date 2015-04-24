@@ -125,7 +125,7 @@ class F
 
 		// 加载模版
 		$view = new \Mvc\View();
-		$view->display("common/{$type}", $data, NULL, FALSE);
+		$view->display("common/notice", $data, NULL, FALSE);
 		exit;
 	}
 }

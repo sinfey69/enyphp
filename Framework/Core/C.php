@@ -13,19 +13,7 @@ class C
 	 * @var array
 	 */
 	private static $_CFG = array();
-
-	/**
-	 * 禁止创建对象
-	 * @return void
-	 */
-	private final function __construct(){}
-
-	/**
-	 * 禁止克隆对象
-	 * @return void
-	 */
-	private final function __clone(){}
-
+	
 	/**
 	 * 简单的获取配置
 	 * @param string 键
@@ -71,7 +59,7 @@ class C
 		$pref = isset(self::$_CFG->$index) ? self::$_CFG->$index : NULL;
 
 		// 取出一个值
-		if($item && $pref)
+		if(!is_null($item) && $pref)
 		{
 			if(is_array($pref))
 			{
