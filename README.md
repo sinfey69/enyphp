@@ -13,7 +13,8 @@
 5. 钩子插件机制<br/>
 6. 模版机制(包含模板插件机制)<br/>
 7. 集成单元测试<br/>
-8. session提供文件、mysql、memcached、redis存储方式<br/>
+8. session支持 文件 | mysql | memcached | redis<br/>
+9. 支持分布式memcached和redis
 
 ---------------------------------------------------
 版本信息：alpha 2015.04.16_0.2<br/>
