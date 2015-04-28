@@ -1,15 +1,17 @@
 <?php
+/**
+ * 钩子插件类(Hook)
+ * @author enychen
+ */
 
 namespace Core;
 
-/**
- * 钩子插件类(Hook)
- */
 class H
 {
 	/**
 	 * 运行钩子
 	 * @param string 要执行的钩子名
+	 * @return void
 	 */
 	public static function run($name)
 	{
@@ -37,16 +39,13 @@ class H
 		{
 			return array();
 		}
-
 		// 获得要执行的钩子列表
 		$hooks = C::hook($name);
-
 		// 是否是一维数组
 		if(is_object($hooks))
 		{
 			$hooks = array($hooks);
 		}		
-
 		return $hooks;
 	}
 }

@@ -1,10 +1,11 @@
 <?php
-
-namespace Common;
-
 /**
  * 头信息输出
+ * @author enychen
  */
+
+namespace Extend;
+
 class Header
 {
 	/**

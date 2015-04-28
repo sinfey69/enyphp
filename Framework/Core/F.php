@@ -1,10 +1,11 @@
 <?php
+/**
+ * 公用函数库
+ * @author enychen
+ */
 
 namespace Core;
 
-/**
- * 公用函数库
- */
 class F
 {
 	/**
@@ -69,7 +70,7 @@ class F
 	}
 
 	/**
-	 * 获得文件的完整路径
+	 * 获得文件的完整路径并创建目录
 	 * @param string 文件名
 	 * @param string 基准目录
 	 * @return string 绝对路径文件名
@@ -85,7 +86,7 @@ class F
 		// 不存在目录则递归创建目录
 		is_dir($path) OR mkdir($path, 0750, TRUE);
 		// 返回文件的绝对路径
-		return sprintf("%s%s-%s", $path, $basename, date('Y-m-d'));
+		return sprintf("%s[%s]%s", $path, date('Y-m-d'), $basename);
 	}
 
 	/**

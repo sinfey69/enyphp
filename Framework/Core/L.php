@@ -1,10 +1,11 @@
 <?php
+/**
+ * 日志记录
+ * @author enychen
+ */
 
 namespace Core;
 
-/**
- * 日志记录
- */
 class L
 {
 	/**
@@ -19,12 +20,10 @@ class L
 	{
 		// 错误整理
 		$error = array('TYPE'=>$code, 'MESSAGE'=>$message, 'FILE'=>$file, 'LINE'=>$line);
-		
 		// 获得格式化后的日志
 		$content = self::content($error);
 		// 文件名
 		$file = "error/runtime";
-
 		// 写入日志
 		self::write($file, $content);
 	}
@@ -55,7 +54,6 @@ class L
 	{
 		// 目录是否存在
 		$file = F::absFile("{$file}.log", LOG);
-
 		// 日志记录
 		file_put_contents($file, $content, FILE_APPEND);
 	}
@@ -68,22 +66,18 @@ class L
 	private static function content($content)
 	{
 		$content = is_array($content) ? $content[0] : array($content);
-
 		// 第一条内容
 		$rule = "[%s]" . PHP_EOL;
 		$args = array(date('H:i:s'));
-
 		// 遍历要输出的内容
 		foreach($content as $key=>$val)
 		{
 			// 拼写规则
 			$rule .= is_numeric($key) ? "%s".PHP_EOL : $key . ": %s".PHP_EOL;
-
 			// 要替换的字符串
 			$args[] = $val;
 		}
 		$rule .= PHP_EOL;
-
 		// 格式化规则
 		array_unshift($args, $rule);
 

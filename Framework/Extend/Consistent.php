@@ -1,8 +1,11 @@
 <?php
-
 /**
- * 分布式
+ * 分布式类
+ * @author enychen
  */
+
+namespace Extend;
+
 class Consistent
 {
 	/**
@@ -22,23 +25,6 @@ class Consistent
 	 * @var int
 	 */
 	protected static $virtual  = 64;
-
-	/**
-	 * 静态存储方式
-	 * @param string 方法名
-	 * @param array 参数
-	 */
-	public static function __callStatic($method, $args)
-	{
-		// 计算哈希值
-		$point = self::hash($args[0]);
-
-		// 选择某一台缓存服务器
-		$object = self::lookup($point);
-
-		// 执行回调函数
-		return call_user_func_array(array($object, $method), $args);
-	}
 	
 	/**
 	 * 计算值落在哪个节点上
@@ -47,7 +33,6 @@ class Consistent
 	 */
 	public static function lookup($point)
 	{
-		echo $point,'<hr/>';
 		// 默认第一个节点
 		$node = current(self::$nodes);
 		// 获取区间节点
@@ -59,8 +44,6 @@ class Consistent
 				break;
 			}
 		}
-
-		echo $node,'<hr/>';
 		
 		// 获取对应的对象
 		return self::$nodes[$node];

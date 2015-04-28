@@ -1,11 +1,11 @@
 <?php
+/**
+ * 路由分析类
+ * @author enychen
+ */
 
 namespace Core;
 
-/**
- * 路由分析类
- * @author Eny
- */
 class D
 {
 	/**
@@ -16,7 +16,7 @@ class D
 
 	/**
 	 * 分析获得控制器和路由
-	 * @return void 
+	 * @return void
 	 */
 	public static function parseUrl()
 	{
@@ -61,7 +61,7 @@ class D
 		else
 		{
 			$routes = trim(F::server('PATH_INFO'), '/');
-			str_replace('.'.self::$routes->suffix, '',  $routes);
+			$routes = str_replace('.'.self::$routes->suffix, '',  $routes);
 			$routes = $routes ? explode('/', $routes) : array();
 		}
 

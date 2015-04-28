@@ -1,11 +1,11 @@
 <?php
-
-namespace Core;
-
 /**
  * 数据检查类
  * @author enychen
  */
+
+namespace Core;
+
 class V
 {
 	/**

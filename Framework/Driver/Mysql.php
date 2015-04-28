@@ -1,14 +1,15 @@
 <?php
-
 /**
  * mysql数据库类
+ * @author enychen
  */
+
 namespace Driver;
 
 class Mysql
 {
 	/**
-	 * 当前对象
+	 * pdo池对象
 	 * @var object
 	 */
 	private static $instance = NULL;
@@ -26,7 +27,7 @@ class Mysql
 	private $stmt;
 
 	/**
-	 * 数据库实例 
+	 * pdo实例
 	 * @var array
 	 */
 	private $map = array();
@@ -57,7 +58,7 @@ class Mysql
 	private final function __clone(){}
 
 	/**
-	 * 创建数据库实例
+	 * 创建数据库连接池对象
 	 * @param array 配置对象数组	
 	 * @return \Driver\Mysql
 	 */
@@ -95,7 +96,7 @@ class Mysql
 					\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION,// 如果出现错误抛出错误警告
 					\PDO::ATTR_ORACLE_NULLS=>\PDO::NULL_TO_STRING,// 把所有的NULL改成""
 					\PDO::ATTR_TIMEOUT=>30// 超时时间
-			);
+			);			
 			// 创建数据库驱动对象
 			$this->pdo = $this->map[$key] = new \Pdo($dsn, $driver->user, $driver->password, $option);
 		}
@@ -204,6 +205,6 @@ class Mysql
 			$sql = substr_replace($sql, $placeholder, $start, $end);
 		}
 		
-		echo $sql;
+		exit($sql);
 	}
 }

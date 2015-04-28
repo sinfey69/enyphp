@@ -1,6 +1,9 @@
 <?php
+/**
+ * 核心框架类
+ * @author enychen
+ */
 
-# 核心库
 use \Core\C, 	// 配置类
 	\Core\D,	// 路由类
 	\Core\F,	// 全局方法类
@@ -9,10 +12,6 @@ use \Core\C, 	// 配置类
 	\Core\S,	// session类
 	\Core\V;	// 验证类
 
-/**
- * 核心框架类
- * @author Eny
- */
 class Eny
 {
 	/**
@@ -38,13 +37,11 @@ class Eny
 		define('FILE',DATA.'File/');// 文件目录
 		define('LOCK',DATA.'Lock/');// 锁机制目录
 		define('SESSION',DATA.'Session/');// session文件目录
-
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
         define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
-
         // 系统环境设置
-        IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
+		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
 		date_default_timezone_set('PRC');// 日期设置
 		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
 		if(!DEBUG)

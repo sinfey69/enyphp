@@ -1,16 +1,16 @@
 <?php
-
-namespace Core;
-
 /**
  * 配置信息类
  * @author enychen
  */
+
+namespace Core;
+
 class C
 {
 	/**
 	 * 通用配置数组
-	 * @var array
+	 * @var object
 	 */
 	private static $_CFG = array();
 	
@@ -22,7 +22,9 @@ class C
 	 */
 	public static function __callStatic($method, $args)
 	{
+		// 合并参数
 		array_unshift($args, $method);
+		// 取值
 		return call_user_func_array('self::G', $args);
 	}
 
@@ -39,7 +41,9 @@ class C
 		// 加载配置文件
 		foreach(array_merge($global, $debug) as $file)
 		{
+			// 加载配置文件
 			require($file);
+			// 合并参数
 			self::$_CFG = array_merge($config, self::$_CFG);
 		}
 
@@ -57,7 +61,6 @@ class C
 	{
 		// 取出一个内容
 		$pref = isset(self::$_CFG->$index) ? self::$_CFG->$index : NULL;
-
 		// 取出一个值
 		if(!is_null($item) && $pref)
 		{
@@ -69,8 +72,7 @@ class C
 			{
 				$pref = isset($pref->$item) ? $pref->$item : NULL;
 			}
-		}
-				
+		}	
 		// 返回参数
 		return $pref;
 	}

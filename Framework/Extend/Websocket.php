@@ -1,11 +1,11 @@
 <?php
-
-namespace NetWork;
-
 /**
  * websocket服务器类
  * @author enychen
  */
+
+namespace Extend;
+
 class Websocket
 {
 	/**
@@ -57,7 +57,7 @@ class Websocket
 	 * @param string 日志路径
 	 * @param string 开启调试输出
 	 */
-	public function __construct($host, $port, $path='.', $debug=TRUE)
+	public function __construct($host, $port, $path='./', $debug=TRUE)
 	{
 		// 主机
 		$this->host = $host;
