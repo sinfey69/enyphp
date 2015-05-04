@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 核心框架类
  * @author enychen
@@ -63,30 +64,22 @@ class Eny
 	 */
 	private static function application()
 	{
-		// 程序开始之前前	
-		H::run('prevSystem');
 		// 加载通用配置
-		C::load();
+		C::initialize();
 		// 路由解析
 		list($class, $function) = D::parseUrl();
 		// 数据检查
 		V::validity();
 		// session初始化
 		S::initialize();
-		// 控制器创建钱
-		H::run('prevController');
 		// 创建控制器
 		$controller = new $class();
-		// 控制器创建后
-		H::run('initController');
 		// 控制器执行前
 		!method_exists($controller, '_init') OR  $controller->_init();
 		// 调用控制器函数
 		$controller->$function();
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
-		// 控制器执行后
-		H::run('afterController');
  	}
 
 	/**

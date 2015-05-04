@@ -21,7 +21,7 @@ class D
 	public static function parseUrl()
 	{
 		// 初始化路由环境
-		self::init();
+		self::initialize();
 		// 初始化文件
 		self::$routes = C::routes();
 		// 获取请求的路径
@@ -38,7 +38,7 @@ class D
 	 * 初始化请求环境
 	 * @return void
 	 */
-	private static function init()
+	private static function initialize()
 	{
         define('IS_GET',$_SERVER['REQUEST_METHOD']=='GET');// GET请求
         define('IS_POST',$_SERVER['REQUEST_METHOD']=='POST');// POST请求
@@ -160,24 +160,24 @@ class D
 
 	/**
 	 * 获取客户端的ip地址
-	 * @return mixed 找到返回ip地址,否则返回NULL
+	 * @return mixed 找到返回ip地址,否则'0.0.0.0'
 	 */
 	private static function ip()
 	{		
-		if(IS_CLI)
-		{
-			return '0.0.0.0';
-		}
+		$ip = '0.0.0.0';
 
-		$ip = NULL;
-		$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
-		foreach($froms as $from)
-		{
-			if($ip = getenv($from))
+		if(!IS_CLI)
+		{		
+			$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
+			foreach($froms as $from)
 			{
-				break;
+				if($ip = getenv($from))
+				{
+					break;
+				}
 			}
 		}
+
 		return $ip;
 	}
 }

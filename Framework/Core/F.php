@@ -26,6 +26,8 @@ class F
 	 */
 	const REDIRECT_SUCCESS = 'success';
 
+	private static $lang = 'zh-cn';
+
 	/**
 	 * 多语言
 	 * @param string key键
@@ -33,10 +35,11 @@ class F
 	 */
 	public static function lang($key)
 	{
-		static $lang;
-
-		if(!$lang)
+		if(!self::$lang)
 		{
+			// 设置默认值
+			self::$lang = 'zh-cn';
+			// 遍历查询
 			if($language = server('HTTP_ACCEPT_LANGUAGE'))
 			{
 				$types = array('zh-cn', 'zh', 'en', 'fr', 'de', 'jp', 'ko', 'es', 'sv');
@@ -45,7 +48,7 @@ class F
 					$pattern = "/{$type}/i";
 					if(preg_match($pattern, $language))
 					{
-						$lang = $type;
+						self::$lang = $type;
 						break;
 					}
 				}
@@ -53,7 +56,7 @@ class F
 		}
 
 		// 读取语言包信息
-		$package = require(LANGUAGE.$lang.'.php');
+		$package = require(LANGUAGE.self::$lang.'.php');
 
 		return isset($package[$key]) ? $package[$key] : NULL;
 	}

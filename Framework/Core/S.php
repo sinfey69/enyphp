@@ -24,14 +24,14 @@ class S
 		// 设置保存方式
 		switch($config->handler)
 		{
+			case 'files':
+				ini_set('session.save_path', SESSION);
+				break;
 			case 'redis':
 			case 'memcached':
 				ini_set('session.save_handler', $config->handler);
 				$driver = C::G($config->handler, $config->path);
 				$config->path = "tcp://{$driver->host}:{$driver->port}";
-			case 'files':
-				ini_set('session.save_path', $config->path);
-				break;
 			case 'mysql':
 				ini_set('session.save_path', 'user');
 				self::$model = new Session();

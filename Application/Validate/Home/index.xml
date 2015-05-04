@@ -11,6 +11,7 @@
 	<input name="equals" from="GET" rule="EQUALS" range="enychen,lisan" prompt="值必须是enychen或者lisan" />
 	<input name="offset" from="GET" rule="INT" default="1" aggregate="limit" />
 	<input name="number" from="GET" rule="INT" default="10" aggregate="limit" />
+	<input name="page" from="GET" rule="INT" default="1" />
 </form>
 
 <!--

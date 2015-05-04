@@ -22,9 +22,7 @@ class C
 	 */
 	public static function __callStatic($method, $args)
 	{
-		// 合并参数
 		array_unshift($args, $method);
-		// 取值
 		return call_user_func_array('self::G', $args);
 	}
 
@@ -32,7 +30,7 @@ class C
 	 * 加载配置
 	 * @return void
 	 */
-	public static function load()
+	public static function initialize()
 	{
 		// 读取通用配置
 		$global = glob(CONFIG."*.php");

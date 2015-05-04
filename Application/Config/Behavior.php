@@ -27,7 +27,7 @@ $config['view']['cache'] = FALSE;
  * - name    session名称
  * - expire  过期时间,0表示永不过期
  */
-$config['session']['handler'] = 'redis';
+$config['session']['handler'] = 'files';
 $config['session']['path'] = 0;
 $config['session']['name'] = 'enyphp';
 $config['session']['expire'] = 0;

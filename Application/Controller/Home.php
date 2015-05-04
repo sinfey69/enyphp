@@ -2,30 +2,15 @@
 
 namespace Controller;
 use \Mvc\Controller;
-use \Core\L;
-
+use \Extend\Page;
 /**
  * 前台入口控制器
  */
 class Home extends Controller
 {
-	public function _init()
-	{
-		$this->view->isCache(REQUEST_FILE);
-	}
-
 	public function index()
 	{
-		$a = new \stdClass();
-		$a->name = '我草啊';
-		$data = array(
-			'if'=>2,
-			'list'=>array(1,2,3,4,5,6,7,8,9),
-			'website'=>array('name'=>'e.enychen.com','t.enychen.com'),
-			'author'=>'enychen',
-			'object'=>$a
-		);
-
-		$this->view->display(REQUEST_FILE, $data);
+		echo "<style>.page a{padding:10px;text-decoration:none;display:inline-block;border:1px solid #333}.page .page-selected{background:blue}</style>";
+		echo "<div class='page'>".Page::build($_GET['page'], 100, 10)."</div>";
 	}
 }
