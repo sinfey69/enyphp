@@ -18,16 +18,6 @@ class Header
 	}
 
 	/**
-	 * 页面跳转
-	 * @param string 跳转地址
-	 * @return void
-	 */
-	public static function location($url)
-	{
-		header("Location: /{$url}");
-	}
-
-	/**
 	 * 缓存控制
 	 * @return void
 	 */

@@ -156,9 +156,9 @@ class View
 		// 模板文件
 		$files[] = "{$this->templateDir}{$tpl}.html";
 		// 编译文件
-		$files[] = $this->compileDir.md5($tpl).".php";
+		$files[] = $this->compileDir.str_replace(array('\\','/'), "_", $tpl).".php";
 		// 缓存文件
-		$files[] = $this->cacheDir.md5(strtolower("{$tpl}_{$id}")).".html";
+		$files[] = $this->cacheDir.str_replace(array('\\','/'), "_", strtolower("{$tpl}_{$id}")).".html";
 
 		return $files;
 	}
