@@ -7,15 +7,14 @@
 namespace Storge;
 
 use Core\C;
-use Extend\Consistent;
 
 class Memcached
 {	
 	/**
-	 * 是否创建对象
+	 * 全局对象
 	 * @var boolean
 	 */
-	private static $create =fALSE;
+	private static $instance = NULL;
 
 	/**
 	 * 禁止创建对象
@@ -36,38 +35,50 @@ class Memcached
 	 */
 	public static function __callStatic($method, $args)
 	{
-		// 检查对象是否创建
-		self::create();
-		// 计算哈希值
-		$point = Consistent::hash($args[0]);
-		// 选择某一台缓存服务器
-		$object = Consistent::lookup($point);
+		if(!self::$instance)
+		{
+			// 检查对象是否创建
+			self::create();
+		}
 		// 执行回调函数
-		return call_user_func_array(array($object, $method), $args);
+		return call_user_func_array(array(self::$instance, $method), $args);
 	}
 	
 	/**
-	 * 增加分布式节点对象
+	 * 创建服务器对象
 	 * @return void
 	 */
 	private static function create()
 	{
-		if(!self::$create)
+		// 创建分布式对象
+		$memcached = new Memcached();
+		// 连接服务器
+		$memcached->addServers(self::config());
+		// 已经创建
+		self::$instance = $memcached;
+		// 删除临时对象
+		unset($memcached);
+	}
+
+	/**
+	 * 整理配置
+	 * @return array
+	 */
+	private static function config()
+	{
+		$mcs = array();
+		foreach(C::memcached() as $key=>$config)
 		{
-			// 创建分布式memcached对象
-			foreach(C::memcached() as $key=>$node)
+			$mc[$key][] = $config->host;
+			$mc[$key][] = $config->port;
+			if(isset($config->weight))
 			{
-				// 创建分布式对象
-				$memcached = new Memcached();
-				// 连接服务器
-				$memcached->addServer($node->host, $node->port, $node->weight);
-				// 增加节点
-				Consistent::addNode("memcached{$key}", $memcached);
-				// 删除临时对象
-				unset($memcached);
+				$mc[$key][] = $config->weight;
 			}
-			// 已经创建
-			self::$create = TRUE;
+
+			$mcs[] = $mc;
 		}
+
+		return $mcs;
 	}
 }
