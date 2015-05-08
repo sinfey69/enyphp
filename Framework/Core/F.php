@@ -26,6 +26,10 @@ class F
 	 */
 	const REDIRECT_SUCCESS = 'success';
 
+	/**
+	 * 语言包
+	 * @var unknown
+	 */
 	private static $lang = 'zh-cn';
 
 	/**
