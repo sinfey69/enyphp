@@ -31,3 +31,7 @@ $config['session']['handler'] = 'files';
 $config['session']['path'] = 0;
 $config['session']['name'] = 'enyphp';
 $config['session']['expire'] = 0;
+
+$config['upload']['ext'] = array('image/jpg','image/jpeg','image/png','image/gif');
+$config['upload']['size'] = 5096;
+$config['upload']['path'] = FILES;
