@@ -65,7 +65,7 @@ class View
 		'/<!--{\/loop}-->/iU' => '<?php }} ?>',
 		'/<!--{break}-->/iU' => '<?php break; ?>',
 		'/<!--{continue}-->/iU' => '<?php continue; ?>',
-		'/<!--{plugin\s+(.+)}-->/iU' => '<?php echo $this->plugin("$1"); ?>',
+		'/<!--{([a-zA-Z]+::[a-zA-Z]+)}-->/iU' => '<?php echo $this->plugin("$1"); ?>',
 		'/<!--{([A-Z_][A-Z0-9_]*)}-->/iU'	=> '<?php echo $1; ?>',
 		'/<!--{\$([a-zA-Z0-9_].*)\s+"(.+)"}-->/iU' => '<?php echo empty($$1) ? "$2" : $$1; ?>',
 		'/<!--{\$([a-zA-Z0-9_].*)}-->/iU' => '<?php echo $$1 ?>',
@@ -284,10 +284,11 @@ class View
 
 	/**
 	 * 插件机制
-	 * @param string 插件
+	 * @param string 插件信息,类名::方法名
 	 */
-	private function plugin($source)
+	private function plugin($origin)
 	{
-		
+		$origin = "\\Plugin\\View\\{$origin}";
+		echo call_user_func($origin, $this->tplVals);
 	}
 }

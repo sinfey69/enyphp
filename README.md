@@ -11,7 +11,7 @@
 03. 基于path_info路由,目前只支持这个<br/>
 04. ActiveRcord数据库模式<br/>
 05. 钩子插件机制<br/>
-06. 模版机制,插件机制)<br/>
+06. 模版机制,插件机制<br/>
 07. 集成单元测试<br/>
 08. session支持文件|mysql|memcached|redis<br/>
 09. 支持分布式memcached和redis<br/>
