@@ -32,14 +32,12 @@ class Memcached
 	 * 静态调用方式
 	 * @param string 方法名
 	 * @param array 参数
+	 * @return mixed
 	 */
 	public static function __callStatic($method, $args)
-	{
-		if(!self::$instance)
-		{
-			// 检查对象是否创建
-			self::create();
-		}
+	{ 
+		// 检查对象是否创建
+		self::$instance OR self::create();
 		// 执行回调函数
 		return call_user_func_array(array(self::$instance, $method), $args);
 	}

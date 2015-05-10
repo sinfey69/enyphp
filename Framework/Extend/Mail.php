@@ -8,6 +8,13 @@ namespace Extend;
 
 class Mail
 {
+	private static $fs;
+	
+	private static function init()
+	{
+		self::$fs = fsockopen($name);
+	}
+	
 	/**
 	 * 发送邮件
 	 */
