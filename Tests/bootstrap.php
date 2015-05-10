@@ -16,7 +16,6 @@ define('COMPILE',DATA.'Compile/');// 模版编译文件
 define('FONT',DATA.'Font/');// 字体目录
 define('FILE',DATA.'File/');// 文件目录
 define('LOCK',DATA.'Lock/');// 锁机制目录
-
 defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
 define('IS_CLI',!strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
 
