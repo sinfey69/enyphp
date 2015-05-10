@@ -27,7 +27,6 @@ class Page
 		{
 			// 设置url地址
 			$url = self::setUrl($key);
-
 			$pageList = self::setRange();
 		}
 		else
@@ -68,6 +67,13 @@ class Page
 		return "{$build['scheme']}{$build['host']}{$build['path']}?{$build['query']}";
 	}
 
+	/**
+	 * 设置范围分页
+	 * @param int 当前页
+	 * @param int $limit 多少个按钮
+	 * @param int 总页数
+	 * @return string
+	 */
 	private static function setRange($now, $limit, $count)
 	{
 		// 首页

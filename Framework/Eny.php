@@ -35,7 +35,7 @@ class Eny
 		define('CACHE',DATA.'Cache/');// 缓存目录
 		define('COMPILE',DATA.'Compile/');// 模版编译文件
 		define('FONT',DATA.'Font/');// 字体目录
-		define('FILE',DATA.'File/');// 文件目录
+		define('FILES',DATA.'Files/');// 文件目录
 		define('LOCK',DATA.'Lock/');// 锁机制目录
 		define('SESSION',DATA.'Session/');// session文件目录
 		// 通用常量定义
@@ -71,7 +71,7 @@ class Eny
 		// 数据检查
 		V::validity();
 		// session初始化
-		S::initialize();
+		//S::initialize();
 		// 创建控制器
 		$controller = new $class();
 		// 控制器执行前
