@@ -12,16 +12,16 @@ server {
         location ~* .*\.php?($|/) {
                 fastcgi_pass unix:/dev/shm/php-fpm.sock;
                 include fastcgi.conf;
-                set $script "/index.php";
+                set $enter "/index.php";
                 set $pathinfo "";
                 if ($uri ~* ^\/(.+?\.php)(/.*)$)
                 {
-                        set $script $1;
+                        set $enter $1;
                         set $pathinfo $2;
                 }
-                fastcgi_param SCRIPT_NAME       $script;
+                fastcgi_param SCRIPT_NAME       $enter;
                 fastcgi_param PATH_INFO         $pathinfo;
-                fastcgi_param SCRIPT_FILENAME   $document_root/$script;
+                fastcgi_param SCRIPT_FILENAME   $document_root/$enter;
         }
 
         location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|ico)$
