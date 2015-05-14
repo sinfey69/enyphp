@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <form>
-	<input name="0" from="REQUEST" require="这个值不能为空啊" rule="INT" prompt="没有值" default="4" aggregate="order" alias="id" />
+	<input name="0" from="REQUEST" rule="INT" prompt="没有值" default="4" aggregate="order" alias="id" />
 	<input name="startime" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate >=" default="time" />
 	<input name="endtime" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate lte" default="date" />
 	<input name="domain" from="GET" rule="STRING" format="%:domainname?" prompt="不合法的字符串" alias="domainname" default="chenxiaobo" />

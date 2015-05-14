@@ -4,7 +4,7 @@
  * @author enychen
  */
 
-namespace Storge;
+namespace Driver;
 
 use Core\C;
 
@@ -26,7 +26,7 @@ class Memcached
 	 * 禁止创建对象
 	 * @return void
 	 */
-	private final function __construct(){}
+	private final function __clone(){}
 
 	/**
 	 * 静态调用方式
@@ -49,9 +49,11 @@ class Memcached
 	private static function create()
 	{
 		// 创建分布式对象
-		$memcached = new Memcached();
+		$memcached = new \Memcached();
 		// 连接服务器
 		$memcached->addServers(self::config());
+		// 设置分布式
+		$memcached->setOption(\Memcached::OPT_DISTRIBUTION,\Memcached::DISTRIBUTION_CONSISTENT);
 		// 已经创建
 		self::$instance = $memcached;
 		// 删除临时对象
@@ -67,14 +69,12 @@ class Memcached
 		$mcs = array();
 		foreach(C::memcached() as $key=>$config)
 		{
-			$mc[$key][] = $config->host;
-			$mc[$key][] = $config->port;
+			$mcs[$key][] = $config->host;
+			$mcs[$key][] = $config->port;
 			if(isset($config->weight))
 			{
-				$mc[$key][] = $config->weight;
+				$mcs[$key][] = $config->weight;
 			}
-
-			$mcs[] = $mc;
 		}
 
 		return $mcs;

@@ -29,4 +29,11 @@ $config['redis'][0]['password'] = "";
  */
 $config['memcached'][0]['host'] = "127.0.0.1";
 $config['memcached'][0]['port'] = '11211';
-$config['memcached'][0]['weight'] = 1;
+$config['memcached'][1]['host'] = "127.0.0.1";
+$config['memcached'][1]['port'] = '11212';
+$config['memcached'][2]['host'] = "127.0.0.1";
+$config['memcached'][2]['port'] = '11213';
+$config['memcached'][3]['host'] = "127.0.0.1";
+$config['memcached'][3]['port'] = '11214';
+$config['memcached'][4]['host'] = "127.0.0.1";
+$config['memcached'][4]['port'] = '11215';
