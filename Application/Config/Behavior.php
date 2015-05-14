@@ -2,36 +2,29 @@
 
 /**
  * 路由默认信息
- * - class 		默认控制器
- * - function 	默认方法
- * - suffix		伪静态后缀
  */
-$config['routes']['class'] = 'Home';
-$config['routes']['function'] = 'index';
-$config['routes']['suffix'] = 'html';
+$config['routes']['class'] = 'Home';	// 默认入口控制器
+$config['routes']['function'] = 'index';	// 默认方法
+$config['routes']['suffix'] = 'html';	// 伪静态后缀
 
 /**
  * 视图配置信息
- * - theme 	主题包
- * - expire 过期时间
- * - cache	是否真缓存
  */
-$config['view']['theme'] = '';
-$config['view']['expire'] = '1440';
-$config['view']['cache'] = FALSE;
+$config['view']['theme'] = '';		// 主题文件夹
+$config['view']['cache'] = FALSE;  	// 是否真缓存
+$config['view']['expire'] = 1440; 		// 真缓存过期时间,0表示不过期
 
 /**
- * session环境
- * - handler 使用session的方式, 可选：files | mysql | redis | memcached
- * - path    session存放地, files写一个文件目录, memcached|redis|mysql 写要使用的编号,具体编号在driver.php配置文件中
- * - name    session名称
- * - expire  过期时间,0表示永不过期
+ * session环境信息
  */
-$config['session']['handler'] = 'files';
-$config['session']['path'] = 0;
-$config['session']['name'] = 'enyphp';
-$config['session']['expire'] = 0;
+$config['session']['handler'] = 'files';	// 存储方式, 可选：files | mysql | redis | memcached
+$config['session']['path'] = SESSION;	// 存储位置, 如果是缓存请写具体的 ip:port
+$config['session']['name'] = 'enyphp';	// SESSION名称
+$config['session']['expire'] = 0;		// 过期时间, 0表示不过期
 
-$config['upload']['ext'] = array('image/jpg','image/jpeg','image/png','image/gif');
-$config['upload']['size'] = 5096;
-$config['upload']['path'] = FILES;
+/**
+ * 文件上传
+ */
+$config['upload']['ext'] = array('jpg', 'jpeg', 'png', 'gif'); 	// 文件类型
+$config['upload']['size'] = 5096;				// 文件大小，按kb计算
+$config['upload']['path'] = FILES;				// 上传位置
