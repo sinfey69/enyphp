@@ -23,7 +23,7 @@ class Memcached
 	private final function __construct(){}
 
 	/**
-	 * 禁止创建对象
+	 * 禁止克隆对象
 	 * @return void
 	 */
 	private final function __clone(){}
@@ -53,7 +53,7 @@ class Memcached
 		// 连接服务器
 		$memcached->addServers(self::config());
 		// 设置分布式
-		$memcached->setOption(\Memcached::OPT_DISTRIBUTION,\Memcached::DISTRIBUTION_CONSISTENT);
+		$memcached->setOption(\Memcached::OPT_DISTRIBUTION, \Memcached::DISTRIBUTION_CONSISTENT);
 		// 已经创建
 		self::$instance = $memcached;
 		// 删除临时对象
