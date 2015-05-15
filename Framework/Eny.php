@@ -23,21 +23,22 @@ class Eny
 	{
 		// 目录定义
 		define('FCPATH',dirname(__DIR__).'/');// 站点目录
-		define('APPLICATION',FCPATH.'Application/');//项目目录
-		define('FRAMEWORK',FCPATH.'Framework/');//框架文件目录
+		define('APPLICATION',FCPATH.'Application/');// 项目目录
+		define('FRAMEWORK',FCPATH.'Framework/');// 框架文件目录
 		define('CONFIG',APPLICATION.'Config/');// 配置文件目录
 		define('VALIDATE',APPLICATION.'Validate/');// 数据xml文件目录
 		define('LANGUAGE',APPLICATION.'Language/');// 语言包目录
 		define('VIEW',APPLICATION.'View/');// 模板目录
-		define('PLUGIN',APPLICATION.'Plugin/');//模块目录
+		define('PLUGIN',APPLICATION.'Plugin/');// 模块目录
 		define('DATA',APPLICATION.'Data/');// 数据目录
 		define('LOG',DATA.'Log/');// 日志目录
 		define('CACHE',DATA.'Cache/');// 缓存目录
 		define('COMPILE',DATA.'Compile/');// 模版编译文件
 		define('FONT',DATA.'Font/');// 字体目录
-		define('FILES',DATA.'Files/');// 文件目录
 		define('LOCK',DATA.'Lock/');// 锁机制目录
 		define('SESSION',DATA.'Session/');// session文件目录
+		define('BOOTSTRAP',FCPATH.'Bootstrap/');// 可访问的目录
+		define('FILES',BOOTSTRAP.'files/');// 文件目录
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
         define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
@@ -52,8 +53,7 @@ class Eny
 			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
 			error_reporting(0);// 关闭报错
 			ini_set('display_errors','off');// 关闭报错
-		}
-		
+		}		
 		// 程序运行
 		self::application();
 	}
@@ -71,13 +71,13 @@ class Eny
 		// 数据检查
 		V::validity();
 		// session初始化
-		//S::initialize();
+		S::initialize();
 		// 创建控制器
 		$controller = new $class();
 		// 控制器执行前
 		!method_exists($controller, '_init') OR  $controller->_init();
 		// 调用控制器函数
-		$controller->$function();
+		$data = $controller->$function();
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
  	}
@@ -115,11 +115,28 @@ class Eny
 	 */
 	public static function appError($errno, $errstr, $errfile, $errline)
 	{
-		// 转换错误到为常量
-		$const = array_search($errno, get_defined_constants());
-		$const = $const ? : $errno;
+		// 错误符号
+		$error = array(
+			0 => 'E_EXCEPTION',
+			1 => 'E_ERROR',
+			2 => 'E_WARNING',
+			4 => 'E_PARSE',
+			8 => 'E_NOTICE',
+			16 => 'E_CORE_ERROR',
+			32 => 'E_CORE_WARNING',
+			64 => 'E_COMPILE_ERROR',
+			128 => 'E_COMPILE_WARNING',
+			256 => 'E_USER_ERROR',
+			512 => 'E_USER_WARNING',
+			1024 => 'E_USER_NOTICE',
+			2048 => 'E_STRICT',
+			4096 => 'E_RECOVERABLE_ERROR',
+			8192 => 'E_DEPRECATED',
+			16384 => 'E_USER_DEPRECATED',
+			32767 => 'E_ALL',
+		);
 		// 错误转向
-		L::error($errno, $errstr, $errfile, $errline);
+		L::error($error[$errno], $errstr, $errfile, $errline);
 		// 抛出500服务器错误
 		header("Location: /50x.html");
 	}	
@@ -131,7 +148,7 @@ class Eny
 	 */
 	public static function appException($e)
 	{
-		self::appError('E_EXCEPTION', $e->getMessage(), $e->getFile(), $e->getLine());
+		self::appError(0, $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
 	/**

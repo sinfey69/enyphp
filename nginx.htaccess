@@ -1,7 +1,7 @@
 server {
         listen 80;
         server_name e.enychen.com;
-        root /var/www/enyphp/Public;
+        root /var/www/enyphp/Bootstrap;
 	index index.php index.html index.htm;
 
         if (!-e $request_filename)
