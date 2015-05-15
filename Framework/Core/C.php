@@ -32,20 +32,13 @@ class C
 	 */
 	public static function initialize()
 	{
-		// 读取通用配置
 		$global = glob(CONFIG."*.php");
-		// 读取开发配置
-		$debug = DEBUG ? glob(CONFIG."*.debug.php") : array();
-		// 加载配置文件
+		$debug = DEBUG ? array(CONFIG."Debug.php") : array();
 		foreach(array_merge($global, $debug) as $file)
 		{
-			// 加载配置文件
 			require($file);
-			// 合并参数
 			self::$_CFG = array_merge($config, self::$_CFG);
 		}
-
-		// 把数组转成对象
 		self::$_CFG = F::toObject(self::$_CFG);
 	}
 
@@ -57,10 +50,14 @@ class C
 	 */
 	public static function G($index, $item=NULL)
 	{
-		// 取出一个内容
-		$pref = isset(self::$_CFG->$index) ? self::$_CFG->$index : NULL;
-		// 取出一个值
-		if(!is_null($item) && $pref)
+		if(empty(self::$_CFG->$index))
+		{
+			return NULL;
+		}
+		
+		$pref = self::$_CFG->$index;
+
+		if(!is_null($item))
 		{
 			if(is_array($pref))
 			{
@@ -70,8 +67,8 @@ class C
 			{
 				$pref = isset($pref->$item) ? $pref->$item : NULL;
 			}
-		}	
-		// 返回参数
+		}
+
 		return $pref;
 	}
 }

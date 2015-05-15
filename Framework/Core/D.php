@@ -15,43 +15,43 @@ class D
 	private static $routes = NULL;
 
 	/**
-	 * 分析获得控制器和路由
+	 * 路由分析
 	 * @return void
 	 */
-	public static function parseUrl()
+	public static function router()
 	{
 		// 初始化路由环境
-		self::initialize();
-		// 初始化文件
+		self::environment();
+		// 初始化配置
 		self::$routes = C::routes();
-		// 获取请求的路径
-		$routes = self::getRouter();
+		// 获得请求路由
+		$routes = self::getRoutes();
 		// 设置路由信息
-		$routes = self::setRouter($routes);
-		// 设置调用信息
+		$routes = self::setRoutes($routes);
+		// 检查控制器
 		self::setController($routes);
 		// 返回信息
 		return array(self::$routes->class, self::$routes->function);
 	}
 
 	/**
-	 * 初始化请求环境
+	 * 初始化路由环境
 	 * @return void
 	 */
-	private static function initialize()
+	private static function environment()
 	{
-        define('IS_GET',$_SERVER['REQUEST_METHOD']=='GET');// GET请求
-        define('IS_POST',$_SERVER['REQUEST_METHOD']=='POST');// POST请求
-        define('IS_AJAX',strcasecmp($_SERVER['REQUEST_METHOD'],'xmlhttprequest'));// AJAX请求
-        define('IS_MOBILE', self::isMoblie());// 是否是手机端
-        define('CLIENT_IP', self::ip()); // 设置ip地址
+        define('IS_GET',F::server('REQUEST_METHOD')=='GET');
+        define('IS_POST',F::server('REQUEST_METHOD')=='POST');
+        define('IS_AJAX',strcasecmp(F::server('REQUEST_METHOD'),'xmlhttprequest'));
+        define('IS_MOBILE',self::isMoblie());
+        define('CLIENT_IP',self::ip());
 	}
 
 	/**
-	 * 获得请求的路由
+	 * 获得请求路由
 	 * @return array
 	 */
-	private static function getRouter()
+	private static function getRoutes()
 	{
 		if(IS_CLI)
 		{
@@ -61,39 +61,32 @@ class D
 		else
 		{
 			$routes = trim(F::server('PATH_INFO'), '/');
-			$routes = str_replace('.'.self::$routes->suffix, '',  $routes);
+			$routes = str_replace('.'.self::$routes->suffix, '', $routes);
 			$routes = $routes ? explode('/', $routes) : array();
 		}
-
 		return $routes;
 	}
 
 	/**
-	 * 设置路由的信息
+	 * 设置路由信息
 	 * @param array 来源信息数组
 	 * @return void
 	 */
-	private static function setRouter($routes)
+	private static function setRoutes($routes)
 	{
-		// 设定请求的内容
 		foreach(array('class', 'function') as $val)
 		{
-			// 如果是数组
 			if(empty($routes[0]) || is_numeric($routes[0]))
 			{
 				break;
 			}
-			// 非法请求参数
 			if(!preg_match('/^([a-z])+$/', $routes[0])) 
 			{
-				// 禁止操作
 				header("Location:/40x.html");
 			}
-			// 路由设置
 			self::$routes->$val = $routes[0];
 			array_splice($routes, 0, 1);
 		}
-
 		return $routes;
 	}
 
@@ -106,16 +99,15 @@ class D
 	{
 		// 类名首字母大写
 		self::$routes->class = ucfirst(self::$routes->class);
-		// 定义通用文件名
+		// 通用文件名
 		define('REQUEST_FILE', self::$routes->class."/".self::$routes->function);
-		// 文件名首字母大写
+		// 设置控制器全称
 		self::$routes->class = '\\Controller\\'.self::$routes->class;
 		// 判断文件是否存在
 		if(!method_exists(self::$routes->class, self::$routes->function))
 		{
 			header("Location:/40x.html");
 		}
-
 		// url请求参数设置到$_REQUEST;
 		$_REQUEST = $routes;
 	}
@@ -126,10 +118,8 @@ class D
 	 */
 	private static function isMoblie()
 	{
-		$isMoblie = FALSE;
 		if($userAgent = F::server('HTTP_USER_AGENT'))
 		{
-			// 手机代理信息
 			$mobileType = array("240x320","acer","acoon","acs-","abacho","ahong","airness","alcatel","amoi",
 			"android","anywhereyougo.com","applewebkit/525","applewebkit/532","asus","audio",
 			"au-mic","avantogo","becker","benq","bilbo","bird","blackberry","blazer","bleu","cdm-",
@@ -144,18 +134,15 @@ class D
 			"sie-","softbank","sony","spice","sprint","spv","symbian","tablet","talkabout","tcl-","teleca","telit",
 			"tianyu","tim-","toshiba","tsm","up.browser","utec","utstar","verykool","virgin","vk-","voda",
 			"voxtel","vx","wap","wellco","wig browser","wii","windows ce","wireless","xda","xde","zte");
-			// 头信息匹配
-			foreach ($mobileType as $device)
+			foreach($mobileType as $device)
 			{
-				if (stristr($userAgent, $device))
+				if(stristr($userAgent, $device))
 				{
-					$isMoblie = TRUE;
-					break;
+					return TRUE;
 				}
 			}
-		}
-		
-		return $isMoblie;
+		}		
+		return FALSE;
 	}
 
 	/**
@@ -165,19 +152,15 @@ class D
 	private static function ip()
 	{		
 		$ip = '0.0.0.0';
-
-		if(!IS_CLI)
-		{		
-			$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
-			foreach($froms as $from)
+		$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
+		foreach($froms as $from)
+		{
+			if($temp = getenv($from))
 			{
-				if($ip = getenv($from))
-				{
-					break;
-				}
+				$ip = $temp;
+				break;
 			}
 		}
-
 		return $ip;
 	}
 }

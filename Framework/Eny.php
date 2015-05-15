@@ -64,10 +64,10 @@ class Eny
 	 */
 	private static function application()
 	{
-		// 加载通用配置
+		// 加载配置
 		C::initialize();
 		// 路由解析
-		list($class, $function) = D::parseUrl();
+		list($class, $function) = D::router();
 		// 数据检查
 		V::validity();
 		// session初始化
