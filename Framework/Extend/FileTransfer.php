@@ -96,7 +96,7 @@ class FileTransfer
 					// php设置错误，没有设置临时文件夹
 					trigger_error('Missing a temporary folder', E_USER_WARNING);
 				case 6:
-					// 无法将临时文件写入磁	盘
+					// 无法将临时文件写入磁盘
 					trigger_error('Failed to write file to disk', E_USER_WARNING);
 				case 8:
 					// 不知道啥，总之先写着

@@ -1,6 +1,6 @@
 <?php
 
-namespace Storge;
+namespace Driver;
 
 use Core\C;
 use Extend\Consistent;
