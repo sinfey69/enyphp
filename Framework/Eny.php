@@ -1,17 +1,17 @@
 <?php
-
 /**
  * 核心框架类
  * @author enychen
  */
 
-use \Core\C, 	// 配置类
-	\Core\D,	// 路由类
-	\Core\F,	// 全局方法类
-	\Core\H,	// 钩子类
-	\Core\L,	// 日志类
-	\Core\S,	// session类
-	\Core\V;	// 验证类
+use 
+\Core\C, // 配置类
+\Core\D,// 路由类
+\Core\F,	 // 全局方法类
+\Core\H, // 钩子类
+\Core\L,	 // 日志类
+\Core\S, // session类
+\Core\V; // 验证类
 
 class Eny
 {
@@ -24,25 +24,24 @@ class Eny
 		// 目录定义
 		define('FCPATH',dirname(__DIR__).'/');// 站点目录
 		define('APPLICATION',FCPATH.'Application/');// 项目目录
-		define('FRAMEWORK',FCPATH.'Framework/');// 框架文件目录
-		define('CONFIG',APPLICATION.'Config/');// 配置文件目录
-		define('VALIDATE',APPLICATION.'Validate/');// 数据xml文件目录
+		define('FRAMEWORK',FCPATH.'Framework/');// 框架目录		
+		define('BOOTSTRAP',FCPATH.'Bootstrap/');// 公共目录
+		define('CONFIG',APPLICATION.'Config/');// 配置目录
+		define('VALIDATE',APPLICATION.'Validate/');// 验证目录
 		define('LANGUAGE',APPLICATION.'Language/');// 语言包目录
 		define('VIEW',APPLICATION.'View/');// 模板目录
-		define('PLUGIN',APPLICATION.'Plugin/');// 模块目录
+		define('PLUGIN',APPLICATION.'Plugin/');// 插件目录
 		define('DATA',APPLICATION.'Data/');// 数据目录
 		define('LOG',DATA.'Log/');// 日志目录
 		define('CACHE',DATA.'Cache/');// 缓存目录
-		define('COMPILE',DATA.'Compile/');// 模版编译文件
+		define('COMPILE',DATA.'Compile/');// 编译文件
 		define('FONT',DATA.'Font/');// 字体目录
-		define('LOCK',DATA.'Lock/');// 锁机制目录
-		define('SESSION',DATA.'Session/');// session文件目录
-		define('BOOTSTRAP',FCPATH.'Bootstrap/');// 可访问的目录
-		define('FILES',BOOTSTRAP.'files/');// 文件目录
+		define('LOCK',DATA.'Lock/');// 锁目录
+		define('SESSION',DATA.'Session/');// SESSION目录
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
-        define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
-        // 系统环境设置
+		define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
+		// 系统环境设置
 		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
 		date_default_timezone_set('PRC');// 日期设置
 		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
@@ -55,14 +54,14 @@ class Eny
 			ini_set('display_errors','off');// 关闭报错
 		}		
 		// 程序运行
-		self::application();
+		self::run();
 	}
 
 	/**
 	 * 程序执行
 	 * @return void
 	 */
-	private static function application()
+	private static function run()
 	{
 		// 加载配置
 		C::initialize();

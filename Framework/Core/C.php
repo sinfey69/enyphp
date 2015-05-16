@@ -50,25 +50,22 @@ class C
 	 */
 	public static function G($index, $item=NULL)
 	{
-		if(empty(self::$_CFG->$index))
+		$pref = NULL;
+		if(isset(self::$_CFG->$index))
 		{
-			return NULL;
-		}
-		
-		$pref = self::$_CFG->$index;
-
-		if(!is_null($item))
-		{
-			if(is_array($pref))
+			$pref  = self::$_CFG->$index;
+			switch(TRUE)
 			{
-			 	$pref = isset($pref[$item]) ? $pref[$item] : NULL;
-			}
-			else
-			{
-				$pref = isset($pref->$item) ? $pref->$item : NULL;
+				case is_null($item):
+					break;
+				case is_array($pref)  && isset($pref[$item]):
+					$pref = $pref[$item];
+					break;
+				case isset($pref->$item):
+					$pref =  $pref->$item;
+					break;
 			}
 		}
-
 		return $pref;
 	}
 }
