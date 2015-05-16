@@ -17,10 +17,10 @@ $config['mysql'][0]['dbname'] = "test";		// 数据库
  * redis配置
  * $config['redis'][编号][配置选项]
  */
-$config['redis'][0]['host'] = "192.168.200.92";	// 主机
-$config['redis'][0]['port'] = 6379;			// 端口
-$config['redis'][0]['timeout'] = 3;			// 超时时间
-$config['redis'][0]['password'] = NULL;		// 密码，没有设置为空
+$config['redis'][0]['host'] = "127.0.0.1";	// 主机
+$config['redis'][0]['port'] = 6379;		// 端口
+$config['redis'][0]['timeout'] = 3;		// 超时时间
+$config['redis'][0]['password'] = NULL;	// 密码，没有设置为空
 
 /**
  * memcached配置

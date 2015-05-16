@@ -90,7 +90,7 @@ class Consistent
 	 * @param string 
 	 * @return int
 	 */
-	private static function hash($value)
+	public static function hash($value)
 	{
 		return sprintf("%u", crc32($value));
 	}

@@ -1,1 +1,3 @@
 <?php
+
+$config['debug'][] = array();

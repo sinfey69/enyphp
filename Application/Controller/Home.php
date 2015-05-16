@@ -3,6 +3,7 @@
 namespace Controller;
 use \Mvc\Controller;
 use \Driver\Memcached;
+use \Driver\Redis;
 /**
  * 前台入口控制器
  */
@@ -20,6 +21,13 @@ class Home extends Controller
 		{
 			echo Memcached::get($_SERVER['REQUEST_URI']);
 		}
+	}
+
+	// redis测试
+	public function redis()
+	{
+		var_dump(redis::set('name','enychen'));
+		var_dump(redis::get('name'));
 	}
 
 	// 画图测试

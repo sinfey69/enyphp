@@ -15,3 +15,4 @@
 	'function'=>'index',
 	'params'=>array(),
 );*/
+$config['hook']['point'] = array();

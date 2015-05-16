@@ -21,7 +21,7 @@ class Redis
 	/**
 	 * 禁止创建对象
 	 */
-	private final function __construct(){}
+	private final function __clone(){}
 
 	/**
 	 * 静态调用方式
@@ -53,12 +53,12 @@ class Redis
 			{
 				$redis = new \Redis();
 				// redis连接
-				if($redis->connect($node->ip, $node->port, $node->timeout))
+				if($redis->connect($node->host, $node->port, $node->timeout))
 				{
 					// redis设置
-					$redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+					//$redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
 					// 是否需要验证
-					!$config->password OR $redis->auth($this->password);
+					!$node->password OR $redis->auth($node->password);
 					// 增加节点
 					Consistent::addNode("redis{$key}", $redis);
 					// 删除临时对象
