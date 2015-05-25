@@ -5,13 +5,13 @@
  */
 
 use 
-\Core\C, // 配置类
+\Core\C,// 配置类
 \Core\D,// 路由类
-\Core\F,	 // 全局方法类
-\Core\H, // 钩子类
-\Core\L,	 // 日志类
-\Core\S, // session类
-\Core\V; // 验证类
+\Core\F,// 全局方法类
+\Core\H,// 钩子类
+\Core\I,// input类
+\Core\L,// 日志类
+\Core\S;// session类
 
 class Eny
 {
@@ -68,7 +68,10 @@ class Eny
 		// 路由解析
 		list($class, $function) = D::router();
 		// 数据检查
-		V::validity();
+		I::validity();
+		echo '<pre>';
+		print_r($_GET);
+		exit;
 		// session初始化
 		S::initialize();
 		// 创建控制器
@@ -114,26 +117,6 @@ class Eny
 	 */
 	public static function appError($errno, $errstr, $errfile, $errline)
 	{
-		// 错误符号
-		$error = array(
-			0 => 'E_EXCEPTION',
-			1 => 'E_ERROR',
-			2 => 'E_WARNING',
-			4 => 'E_PARSE',
-			8 => 'E_NOTICE',
-			16 => 'E_CORE_ERROR',
-			32 => 'E_CORE_WARNING',
-			64 => 'E_COMPILE_ERROR',
-			128 => 'E_COMPILE_WARNING',
-			256 => 'E_USER_ERROR',
-			512 => 'E_USER_WARNING',
-			1024 => 'E_USER_NOTICE',
-			2048 => 'E_STRICT',
-			4096 => 'E_RECOVERABLE_ERROR',
-			8192 => 'E_DEPRECATED',
-			16384 => 'E_USER_DEPRECATED',
-			32767 => 'E_ALL',
-		);
 		// 错误转向
 		L::error($error[$errno], $errstr, $errfile, $errline);
 		// 抛出500服务器错误
