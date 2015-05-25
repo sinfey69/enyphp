@@ -31,7 +31,7 @@ class D
 		// 检查控制器
 		self::setController($routes);
 		// 返回信息
-		return array(self::$routes->class, self::$routes->function);
+		return array(self::$routes['class'], self::$routes['function']);
 	}
 
 	/**
@@ -61,7 +61,7 @@ class D
 		else
 		{
 			$routes = trim(F::server('PATH_INFO'), '/');
-			$routes = str_replace('.'.self::$routes->suffix, '', $routes);
+			$routes = str_replace('.'.self::$routes['suffix'], '', $routes);
 			$routes = $routes ? explode('/', $routes) : array();
 		}
 		return $routes;
@@ -84,7 +84,7 @@ class D
 			{
 				header("Location:/40x.html");
 			}
-			self::$routes->$val = $routes[0];
+			self::$routes[$val] = $routes[0];
 			array_splice($routes, 0, 1);
 		}
 		return $routes;
@@ -98,13 +98,13 @@ class D
 	private static function setController($routes)
 	{
 		// 类名首字母大写
-		self::$routes->class = ucfirst(self::$routes->class);
+		self::$routes['class'] = ucfirst(self::$routes['class']);
 		// 通用文件名
-		define('REQUEST_FILE', self::$routes->class."/".self::$routes->function);
+		define('REQUEST_FILE', self::$routes['class']."/".self::$routes['function']);
 		// 设置控制器全称
-		self::$routes->class = '\\Controller\\'.self::$routes->class;
+		self::$routes['class'] = '\\Controller\\'.self::$routes['class'];
 		// 判断文件是否存在
-		if(!method_exists(self::$routes->class, self::$routes->function))
+		if(!method_exists(self::$routes['class'], self::$routes['function']))
 		{
 			header("Location:/40x.html");
 		}
@@ -150,7 +150,7 @@ class D
 	 * @return mixed 找到返回ip地址,否则'0.0.0.0'
 	 */
 	private static function ip()
-	{		
+	{	
 		$ip = '0.0.0.0';
 		$froms = array('HTTP_CLIENT_IP','HTTP_X_FORWARDED_FOR','HTTP_X_FORWARDED','HTTP_FORWARDED_FOR','REMOTE_ADDR');
 		foreach($froms as $from)

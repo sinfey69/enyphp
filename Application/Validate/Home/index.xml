@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <form>
-	<input name="0" from="REQUEST" rule="INT" prompt="没有值" default="4" aggregate="order" alias="id" />
-	<input name="startime" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate >=" default="time" />
-	<input name="endtime" from="GET" rule="INT" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate lte" default="date" />
-	<input name="domain" from="GET" rule="STRING" format="%:domainname?" prompt="不合法的字符串" alias="domainname" default="chenxiaobo" />
-	<input name="reg" from="GET" rule="REGEXP" pattern="/[1-9]+/" prompt="正则验证失败" />
-	<input name="ip" from="GET" rule="IP" prompt="ip地址有误" default="127.0.0.1" />
-	<input name="mail" from="GET" rule="EMAIL" prompt="邮箱格式不正确" />
-	<input name="url" from="GET" rule="URL" prompt="域名地址不正确" default="http://www.enychen.com" />
-	<input name="equals" from="GET" rule="EQUALS" range="enychen,lisan" prompt="值必须是enychen或者lisan" />
-	<input name="offset" from="GET" rule="INT" default="1" aggregate="limit" />
-	<input name="number" from="GET" rule="INT" default="10" aggregate="limit" />
-	<input name="page" from="GET" rule="INT" default="1" />
+	<input name="0" from="REQUEST" rule="int" prompt="没有值" default="4" aggregate="order" alias="id" />
+	<input name="startime" from="GET" rule="int" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate >=" default="time" />
+	<input name="endtime" from="GET" rule="int" range="1,100" prompt="必须是1-100之间的数据" alias="finishdate lte" default="date" />
+	<input name="domain" from="GET" rule="string" format="%:domainname?" prompt="不合法的字符串" alias="domainname" default="chenxiaobo" />
+	<input name="reg" from="GET" rule="regexp" pattern="/[1-9]+/" prompt="正则验证失败" />
+	<input name="ip" from="GET" rule="ip" prompt="ip地址有误" default="127.0.0.1" />
+	<input name="mail" from="GET" rule="email" prompt="邮箱格式不正确" />
+	<input name="url" from="GET" rule="url" prompt="域名地址不正确" default="http://www.enychen.com" />
+	<input name="equals" from="GET" rule="in" range="enychen,lisan" prompt="值必须是enychen或者lisan" />
+	<input name="offset" from="GET" rule="int" default="1" aggregate="limit" />
+	<input name="number" from="GET" rule="int" default="10" aggregate="limit" />
+	<input name="page" from="GET" rule="int" default="1" />
 </form>
 
 <!--

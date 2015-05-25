@@ -9,8 +9,9 @@ use
 \Core\D,// 路由类
 \Core\F,// 全局方法类
 \Core\H,// 钩子类
-\Core\I,// input类
+\Core\I,// 输入类
 \Core\L,// 日志类
+\Core\R,// 输出类
 \Core\S;// session类
 
 class Eny
@@ -52,7 +53,8 @@ class Eny
 			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
 			error_reporting(0);// 关闭报错
 			ini_set('display_errors','off');// 关闭报错
-		}		
+		}
+
 		// 程序运行
 		self::run();
 	}
@@ -64,7 +66,7 @@ class Eny
 	private static function run()
 	{
 		// 加载配置
-		C::initialize();
+		C::loadConfig();
 		// 路由解析
 		list($class, $function) = D::router();
 		// 数据检查
@@ -74,11 +76,13 @@ class Eny
 		// 创建控制器
 		$controller = new $class();
 		// 控制器执行前
-		!method_exists($controller, '_init') OR  $controller->_init();
+		!method_exists($controller, '_init') OR $controller->_init();
 		// 调用控制器函数
-		$data = $controller->$function();
+		$controller->$function();
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
+		// 浏览器输出
+		R::response();
  	}
 
 	/**
@@ -116,8 +120,8 @@ class Eny
 	{
 		// 错误转向
 		L::error($error[$errno], $errstr, $errfile, $errline);
-		// 抛出500服务器错误
-		header("Location: /50x.html");
+		// 服务器错误
+		R::serverError();
 	}	
 
 	/**

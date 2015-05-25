@@ -28,7 +28,9 @@ class I
 		if($rules = self::getRule())
 		{
 			// 数据检查
-			self::validate($rules);
+			$rules = self::validate($rules);
+			// 格式化数据
+			$rules = self::format($rules);
 		}
 		// 影响全局变量
 		self::initialize();
@@ -52,7 +54,7 @@ class I
 				$rules[] = $rule;
 			}
 			// 初始化验证规则
-			return self::isExists($rules);
+			return self::initRules($rules);
 		}
 		return FALSE;
 	}
@@ -70,6 +72,8 @@ class I
 			$from = strtoupper("_{$rule->from}");
 			// 值
 			$value = isset($GLOBALS[$from][$rule->name]) ? $GLOBALS[$from][$rule->name] : NULL;
+			// 规则
+			$rule->rule = ucfirst($rule->rule);
 			// 原始值
 			$rule->origin = is_array($value) ? $value : explode(',', $value);
 			// 别名
@@ -115,16 +119,15 @@ class I
 					// 检查值
 					self::callback($rule);
 					// 去掉空格
-					trim(&$rule->value);
+					$rule->origin[$i] = trim($rule->value);
 				}
-			}			
+			}
 
 			// 单个值还是一整个数组
-			$rule->value = $i > 1 ? $save : reset($save);
-
-			// 设置值
-			self::set($rule);
+			$rule->value = $i > 1 ? $rule->origin : $rule->origin[0];
 		}
+
+		return $rules;
 	}
 
 	/**
@@ -134,7 +137,7 @@ class I
 	private static function callback($rule)
 	{
 		$funcName = "filter{$rule->rule}";
-		function_exists($rule->$funcName) OR require(PLUGIN."/Filter/{$rule->rule}.php");
+		function_exists($funcName) OR require(PLUGIN."/Filter/{$rule->rule}.php");
 		if(FALSE === $funcName($rule))
 		{
 			self::throwError($rule->prompt);

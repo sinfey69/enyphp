@@ -22,7 +22,9 @@ class C
 	 */
 	public static function __callStatic($method, $args)
 	{
+		// 绑定键
 		array_unshift($args, $method);
+		// 回调获取参数
 		return call_user_func_array('self::G', $args);
 	}
 
@@ -30,7 +32,7 @@ class C
 	 * 加载配置
 	 * @return void
 	 */
-	public static function initialize()
+	public static function loadConfig()
 	{
 		$global = glob(CONFIG."*.php");
 		$debug = DEBUG ? array(CONFIG."Debug.php") : array();
@@ -39,7 +41,6 @@ class C
 			require($file);
 			self::$_CFG = array_merge($config, self::$_CFG);
 		}
-		self::$_CFG = F::toObject(self::$_CFG);
 	}
 
 	/**
@@ -50,21 +51,10 @@ class C
 	 */
 	public static function G($index, $item=NULL)
 	{
-		$pref = NULL;
-		if(isset(self::$_CFG->$index))
+		$pref = isset(self::$_CFG[$index]) ? self::$_CFG[$index] : NULL;
+		if(!is_null($item))
 		{
-			$pref  = self::$_CFG->$index;
-			switch(TRUE)
-			{
-				case is_null($item):
-					break;
-				case is_array($pref)  && isset($pref[$item]):
-					$pref = $pref[$item];
-					break;
-				case isset($pref->$item):
-					$pref =  $pref->$item;
-					break;
-			}
+			$pref = isset($pref[$item]) ? $pref[$item] : NULL;
 		}
 		return $pref;
 	}
