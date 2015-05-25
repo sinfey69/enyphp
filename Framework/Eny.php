@@ -69,9 +69,6 @@ class Eny
 		list($class, $function) = D::router();
 		// 数据检查
 		I::validity();
-		echo '<pre>';
-		print_r($_GET);
-		exit;
 		// session初始化
 		S::initialize();
 		// 创建控制器
