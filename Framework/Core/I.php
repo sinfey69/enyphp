@@ -117,7 +117,7 @@ class I
 					// 设置当前要检查的值
 					$rule->value = $rule->origin[$i];
 					// 检查值
-					self::callback($rule);
+					Plugin\System::$rule->rule($rule) OR self::throwError($rule->prompt);
 					// 去掉空格
 					$rule->origin[$i] = trim($rule->value);
 				}
@@ -128,20 +128,6 @@ class I
 		}
 
 		return $rules;
-	}
-
-	/**
-	 * 加载验证函数并进行验证
-	 * @param object 验证对象
-	 */
-	private static function callback($rule)
-	{
-		$funcName = "filter{$rule->rule}";
-		function_exists($funcName) OR require(PLUGIN."/Filter/{$rule->rule}.php");
-		if(FALSE === $funcName($rule))
-		{
-			self::throwError($rule->prompt);
-		}
 	}
 
 	/**
