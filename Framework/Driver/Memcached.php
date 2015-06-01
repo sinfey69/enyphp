@@ -6,8 +6,6 @@
 
 namespace Driver;
 
-use Core\C;
-
 class Memcached
 {	
 	/**
@@ -50,10 +48,12 @@ class Memcached
 	{
 		// 创建分布式对象
 		$memcached = new \Memcached();
+		// 整理配置
+		list($servers, $much) = self::config();
 		// 连接服务器
-		$memcached->addServers(self::config());
+		$memcached->addServers();
 		// 设置分布式
-		$memcached->setOption(\Memcached::OPT_DISTRIBUTION, \Memcached::DISTRIBUTION_CONSISTENT);
+		$much <= 1 OR $memcached->setOption(\Memcached::OPT_DISTRIBUTION, \Memcached::DISTRIBUTION_CONSISTENT);
 		// 已经创建
 		self::$instance = $memcached;
 		// 删除临时对象
@@ -66,17 +66,13 @@ class Memcached
 	 */
 	private static function config()
 	{
-		$mcs = array();
-		foreach(C::memcached() as $key=>$config)
+		foreach(C('memcached') as $key=>$config)
 		{
-			$mcs[$key][] = $config->host;
-			$mcs[$key][] = $config->port;
-			if(isset($config->weight))
-			{
-				$mcs[$key][] = $config->weight;
-			}
+			$mcs[$key][] = $config['host'];
+			$mcs[$key][] = $config['port'];
+			empty($config->weight) OR ($mcs[$key][] = $config['weight']);
 		}
 
-		return $mcs;
+		return array($mcs, count($mcs));
 	}
 }

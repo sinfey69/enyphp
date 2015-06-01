@@ -2,7 +2,6 @@
 
 namespace Driver;
 
-use Core\C;
 use Extend\Consistent;
 
 class Redis
@@ -11,7 +10,7 @@ class Redis
 	 * 是否创建对象
 	 * @var boolean
 	 */
-	private static $create =fALSE;
+	private static $instance =FALSE;
 	
 	/**
 	 * 禁止创建对象
@@ -31,7 +30,7 @@ class Redis
 	public static function __callStatic($method, $args)
 	{
 		// 检查对象是否创建
-		self::create();
+		self::$instance OR self::create();
 		// 计算哈希值
 		$point = Consistent::hash($args[0]);
 		// 选择某一台缓存服务器
@@ -46,31 +45,25 @@ class Redis
 	 */
 	private static function create()
 	{
-		// 对象已经创建
-		if(!self::$create)
+		foreach(C('redis') as $key=>$node)
 		{
-			foreach(C::redis() as $key=>$node)
+			$redis = new \Redis();
+			// redis连接
+			if($redis->connect($node['host'], $node['port'], $node['timeout']))
 			{
-				$redis = new \Redis();
-				// redis连接
-				if($redis->connect($node->host, $node->port, $node->timeout))
-				{
-					// redis设置
-					//$redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-					// 是否需要验证
-					!$node->password OR $redis->auth($node->password);
-					// 增加节点
-					Consistent::addNode("redis{$key}", $redis);
-					// 删除临时对象
-					unset($redis);
-				}
-				else
-				{
-					throw new \RedisException("Redis Connection Error: {$node->ip}");
-				}
+				// 是否需要验证
+				!$node['password'] OR $redis->auth($node['password']);
+				// 增加节点
+				Consistent::addNode("redis{$key}", $redis);
+				// 删除临时对象
+				unset($redis);
 			}
-			// 已经创建
-			self::$create = TRUE;
+			else
+			{
+				throw new \RedisException("Redis Connection Error: {$node['ip']}");
+			}
 		}
+
+		self::$instance = TRUE;
 	}
 }

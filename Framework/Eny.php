@@ -4,28 +4,59 @@
  * @author enychen
  */
 
-use 
-\Core\C,// 配置类
-\Core\D,// 路由类
-\Core\F,// 全局方法类
-\Core\H,// 钩子类
-\Core\I,// 输入类
-\Core\L,// 日志类
-\Core\R,// 输出类
-\Core\S;// session类
+use
+\Core\Router,//路由类
+\Core\Hook,// 钩子类
+\Core\Input,// 输入类
+\Core\Log,// 日志类
+\Core\Output,// 输出类
+\Core\Session;// session类
 
 class Eny
 {
+	/**
+	 * 全局配置
+	 * @var array
+	 */
+	public static $_CFG = array();
+
 	/**
 	 * 初始化
 	 * @return void
 	 */
 	public static function boot()
 	{
+		// 运行时文件
+		$runtime = __DIR__.'../Application/Data/~Runtime.php';
+
+		if(file_exists($runtime))
+		{
+			// 加载运行时文件
+			require($runtime);
+		}
+		else 
+		{
+			// 目录定义
+			self::defineFolder();
+			// 加载配置
+			self::loadConf();
+			// 初始化环境
+			self::initialize();		
+			// 程序运行
+			self::application();
+		}		
+	}
+
+	/**
+	 * 目录常量定义
+	 * @return void
+	 */
+	private static function defineFolder()
+	{
 		// 目录定义
 		define('FCPATH',dirname(__DIR__).'/');// 站点目录
 		define('APPLICATION',FCPATH.'Application/');// 项目目录
-		define('FRAMEWORK',FCPATH.'Framework/');// 框架目录		
+		define('FRAMEWORK',FCPATH.'Framework/');// 框架目录	
 		define('BOOTSTRAP',FCPATH.'Bootstrap/');// 公共目录
 		define('CONFIG',APPLICATION.'Config/');// 配置目录
 		define('VALIDATE',APPLICATION.'Validate/');// 验证目录
@@ -39,12 +70,28 @@ class Eny
 		define('FONT',DATA.'Font/');// 字体目录
 		define('LOCK',DATA.'Lock/');// 锁目录
 		define('SESSION',DATA.'Session/');// SESSION目录
+	}
+	
+	/**
+	 * 初始化环境
+	 * @return void
+	 */
+	private static function initialize()
+	{
+		// 全局函数
+		require(FRAMEWORK.'Core/Function.php');
 		// 通用常量定义
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
 		define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
-		// 系统环境设置
+		define('IS_GET',server('REQUEST_METHOD')=='GET');// get请求
+        define('IS_POST',server('REQUEST_METHOD')=='POST');// post请求
+        define('IS_PUT',server('REQUEST_METHOD')=='PUT');// put请求
+        define('IS_DELETE',server('REQUEST_METHOD')=='DELETE');// delete请求
+        define('IS_AJAX',strcasecmp(server('REQUEST_METHOD'),'xmlhttprequest'));//ajax请求
+        define('IS_MOBILE',isMoblie());//手机端请求
+        define('CLIENT_IP',ip());//ip地址
 		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
-		date_default_timezone_set('PRC');// 日期设置
+		date_default_timezone_set(C('global', 'timezone'));// 日期设置
 		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
 		if(!DEBUG)
 		{
@@ -53,26 +100,24 @@ class Eny
 			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
 			error_reporting(0);// 关闭报错
 			ini_set('display_errors','off');// 关闭报错
-		}
-
-		// 程序运行
-		self::run();
+			self::compile();// 编译运行文件,减少加载
+		}		
 	}
 
 	/**
 	 * 程序执行
 	 * @return void
 	 */
-	private static function run()
-	{
-		// 加载配置
-		C::loadConfig();
+	private static function application()
+	{		
 		// 路由解析
-		list($class, $function) = D::router();
+		list($class, $function) = Router::dispatch();
 		// 数据检查
-		I::validity();
+		Input::validity();
 		// session初始化
-		S::initialize();
+		Session::initialize();
+		// 控制器运行前的钩子
+		Hook::runHook('prevController');
 		// 创建控制器
 		$controller = new $class();
 		// 控制器执行前
@@ -82,7 +127,51 @@ class Eny
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
 		// 浏览器输出
-		R::response();
+		Output::response();
+ 	}
+
+ 	/**
+ 	 * 加载配置
+ 	 * @return
+ 	 */
+ 	private static function loadConf()
+ 	{
+ 		// 加载所有配置文件
+		$global = glob(CONFIG."*.php");
+		// 加载调试文件
+		if(($key=array_search(CONFIG."Debug.php", $global)) !== FALSE)
+		{
+			$debug = array_splice($global, $key, 1);
+			if(DEBUG)
+			{
+				$global[] = $debug[0];
+			}
+		}
+		// 加载配置
+		foreach($global as $conf)
+		{
+			require($conf);
+			self::$_CFG = array_merge($config, self::$_CFG);
+		}
+ 	}
+
+ 	/**
+ 	 * 运行文件编译
+ 	 * @return void
+ 	 */
+ 	private static function compile()
+ 	{
+ 		$compile = '<?php';
+
+ 		// 全局函数
+ 		$functions = str_replace('<?php', '', file_get_contents(FRAMEWORK.'Core/Function.php'));
+ 		// 常量定义
+ 		$const = get_defined_constants(TRUE)['user'];
+
+ 		echo '<pre>';
+ 		print_r($const);
+
+ 		exit;
  	}
 
 	/**
@@ -121,7 +210,7 @@ class Eny
 		// 错误转向
 		L::error($error[$errno], $errstr, $errfile, $errline);
 		// 服务器错误
-		R::serverError();
+		R::_500();
 	}	
 
 	/**

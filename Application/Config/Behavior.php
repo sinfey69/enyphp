@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * 全局设置
+ */
+$config['global']['timezone'] = 'Asia/Shanghai';	//时区
+
+/**
  * 路由默认信息
  */
 $config['routes']['class'] = 'Home';	// 默认入口控制器
