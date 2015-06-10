@@ -82,7 +82,7 @@ class Filter
 		{
 			$length = strlen($rule->value);
 			$range = explode(',', $rule->range);
-			$max = empty($range[1]) ? PHP_INT_MAX ? $range[1];
+			$max = empty($range[1]) ? PHP_INT_MAX : $range[1];
 			$min = empty($range[0]) ? 0 : $range[0];
 			// 是否在此区间中
 			$flag = ($length <= $max && $length >= $min);

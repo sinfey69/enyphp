@@ -5,11 +5,11 @@
  */
 
 use
-\Core\Router,//路由类
 \Core\Hook,// 钩子类
 \Core\Input,// 输入类
 \Core\Log,// 日志类
 \Core\Output,// 输出类
+\Core\Router,//路由类
 \Core\Session;// session类
 
 class Eny
@@ -18,7 +18,7 @@ class Eny
 	 * 全局配置
 	 * @var array
 	 */
-	public static $_CFG = array();
+	private static $_CFG = array();
 
 	/**
 	 * 初始化
@@ -26,57 +26,45 @@ class Eny
 	 */
 	public static function boot()
 	{
-		// 运行时文件
-		$runtime = __DIR__.'../Application/Data/~Runtime.php';
-
-		if(file_exists($runtime))
-		{
-			// 加载运行时文件
-			require($runtime);
-		}
-		else 
-		{
-			// 目录定义
-			self::defineFolder();
-			// 加载配置
-			self::loadConf();
-			// 初始化环境
-			self::initialize();		
-			// 程序运行
-			self::application();
-		}		
+		// 目录定义
+		self::structure();
+		// 加载配置
+		self::configure();
+		// 初始化环境
+		self::environment();
+		// 程序运行
+		self::application();
 	}
 
 	/**
 	 * 目录常量定义
 	 * @return void
 	 */
-	private static function defineFolder()
+	private static function structure()
 	{
-		// 目录定义
-		define('FCPATH',dirname(__DIR__).'/');// 站点目录
-		define('APPLICATION',FCPATH.'Application/');// 项目目录
-		define('FRAMEWORK',FCPATH.'Framework/');// 框架目录	
-		define('BOOTSTRAP',FCPATH.'Bootstrap/');// 公共目录
-		define('CONFIG',APPLICATION.'Config/');// 配置目录
-		define('VALIDATE',APPLICATION.'Validate/');// 验证目录
-		define('LANGUAGE',APPLICATION.'Language/');// 语言包目录
-		define('VIEW',APPLICATION.'View/');// 模板目录
-		define('PLUGIN',APPLICATION.'Plugin/');// 插件目录
-		define('DATA',APPLICATION.'Data/');// 数据目录
-		define('LOG',DATA.'Log/');// 日志目录
-		define('CACHE',DATA.'Cache/');// 缓存目录
-		define('COMPILE',DATA.'Compile/');// 编译文件
-		define('FONT',DATA.'Font/');// 字体目录
-		define('LOCK',DATA.'Lock/');// 锁目录
-		define('SESSION',DATA.'Session/');// SESSION目录
+		define('FCPATH', dirname(__DIR__).'/');// 站点目录
+		define('APPLICATION', FCPATH.'Application/');// 项目目录
+		define('FRAMEWORK', FCPATH.'Framework/');// 框架目录	
+		define('BOOTSTRAP', FCPATH.'Bootstrap/');// 公共目录
+		define('CONFIG', APPLICATION.'Config/');// 配置目录
+		define('VALIDATE', APPLICATION.'Validate/');// 验证目录
+		define('LANGUAGE', APPLICATION.'Language/');// 语言包目录
+		define('VIEW', APPLICATION.'View/');// 模板目录
+		define('PLUGIN', APPLICATION.'Plugin/');// 插件目录
+		define('DATA', APPLICATION.'Data/');// 数据目录
+		define('LOG', DATA.'Log/');// 日志目录
+		define('CACHE', DATA.'Cache/');// 缓存目录
+		define('COMPILE', DATA.'Compile/');// 编译文件
+		define('FONT', DATA.'Font/');// 字体目录
+		define('LOCK', DATA.'Lock/');// 锁目录
+		define('SESSION', DATA.'Session/');// SESSION目录
 	}
 	
 	/**
 	 * 初始化环境
 	 * @return void
 	 */
-	private static function initialize()
+	private static function environment()
 	{
 		// 全局函数
 		require(FRAMEWORK.'Core/Function.php');
@@ -84,12 +72,12 @@ class Eny
 		defined('DEBUG') OR define('DEBUG',FALSE);// 调试模式
 		define('IS_CLI', !strcasecmp(php_sapi_name(), 'cli'));// 命令行模式
 		define('IS_GET',server('REQUEST_METHOD')=='GET');// get请求
-        define('IS_POST',server('REQUEST_METHOD')=='POST');// post请求
-        define('IS_PUT',server('REQUEST_METHOD')=='PUT');// put请求
-        define('IS_DELETE',server('REQUEST_METHOD')=='DELETE');// delete请求
-        define('IS_AJAX',strcasecmp(server('REQUEST_METHOD'),'xmlhttprequest'));//ajax请求
-        define('IS_MOBILE',isMoblie());//手机端请求
-        define('CLIENT_IP',ip());//ip地址
+		define('IS_POST',server('REQUEST_METHOD')=='POST');// post请求
+		define('IS_PUT',server('REQUEST_METHOD')=='PUT');// put请求
+		define('IS_DELETE',server('REQUEST_METHOD')=='DELETE');// delete请求
+		define('IS_AJAX',strcasecmp(server('REQUEST_METHOD'),'xmlhttprequest'));//ajax请求
+		define('IS_MOBILE',isMoblie());//手机端请求
+		define('CLIENT_IP',ip());//ip地址
 		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
 		date_default_timezone_set(C('global', 'timezone'));// 日期设置
 		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
@@ -100,7 +88,6 @@ class Eny
 			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
 			error_reporting(0);// 关闭报错
 			ini_set('display_errors','off');// 关闭报错
-			self::compile();// 编译运行文件,减少加载
 		}		
 	}
 
@@ -126,15 +113,13 @@ class Eny
 		$controller->$function();
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
-		// 浏览器输出
-		Output::response();
  	}
 
  	/**
  	 * 加载配置
  	 * @return
  	 */
- 	private static function loadConf()
+ 	private static function configure()
  	{
  		// 加载所有配置文件
 		$global = glob(CONFIG."*.php");
@@ -153,25 +138,6 @@ class Eny
 			require($conf);
 			self::$_CFG = array_merge($config, self::$_CFG);
 		}
- 	}
-
- 	/**
- 	 * 运行文件编译
- 	 * @return void
- 	 */
- 	private static function compile()
- 	{
- 		$compile = '<?php';
-
- 		// 全局函数
- 		$functions = str_replace('<?php', '', file_get_contents(FRAMEWORK.'Core/Function.php'));
- 		// 常量定义
- 		$const = get_defined_constants(TRUE)['user'];
-
- 		echo '<pre>';
- 		print_r($const);
-
- 		exit;
  	}
 
 	/**
@@ -208,7 +174,7 @@ class Eny
 	public static function appError($errno, $errstr, $errfile, $errline)
 	{
 		// 错误转向
-		L::error($error[$errno], $errstr, $errfile, $errline);
+		Log::error($error[$errno], $errstr, $errfile, $errline);
 		// 服务器错误
 		R::_500();
 	}	
