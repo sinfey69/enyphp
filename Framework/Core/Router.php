@@ -29,7 +29,7 @@ class Router
 		// 检查控制器
 		self::setController($routes);
 		// 返回信息
-		return array(self::$routes['class'], self::$routes['function']);
+		return array(self::$routes->class, self::$routes->function);
 	}
 
 	/**

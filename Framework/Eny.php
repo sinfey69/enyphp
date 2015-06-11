@@ -9,17 +9,11 @@ use
 \Core\Input,// 输入类
 \Core\Log,// 日志类
 \Core\Output,// 输出类
-\Core\Router,//路由类
+\Core\Router,// 路由类
 \Core\Session;// session类
 
 class Eny
 {
-	/**
-	 * 全局配置
-	 * @var array
-	 */
-	private static $_CFG = array();
-
 	/**
 	 * 初始化
 	 * @return void
@@ -117,27 +111,20 @@ class Eny
 
  	/**
  	 * 加载配置
- 	 * @return
+ 	 * @return void
  	 */
  	private static function configure()
  	{
  		// 加载所有配置文件
-		$global = glob(CONFIG."*.php");
-		// 加载调试文件
-		if(($key=array_search(CONFIG."Debug.php", $global)) !== FALSE)
-		{
-			$debug = array_splice($global, $key, 1);
-			if(DEBUG)
-			{
-				$global[] = $debug[0];
-			}
-		}
+		$master = glob(CONFIG .'*.php');
+		$dev = DEBUG ? glob(CONFIG."dev/*.php") : array();
 		// 加载配置
-		foreach($global as $conf)
+		foreach(array_merge($master, $dev) as $file)
 		{
-			require($conf);
-			self::$_CFG = array_merge($config, self::$_CFG);
+			require($file);
+			$temp = array_merge($config, $temp);
 		}
+		$GLOBALS['_CFG'] = $temp;
  	}
 
 	/**
@@ -176,7 +163,7 @@ class Eny
 		// 错误转向
 		Log::error($error[$errno], $errstr, $errfile, $errline);
 		// 服务器错误
-		R::_500();
+		header('Location: /50x.html');
 	}	
 
 	/**

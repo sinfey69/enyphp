@@ -29,7 +29,7 @@ function lang($key)
 	static $package;
 
 	if(!$lang)
-	{
+	{	
 		// 设置默认值
 		$lang = 'zh-cn';
 		// 遍历查询
