@@ -8,18 +8,11 @@ namespace Core;
 
 class Output
 {
-
 	/**
 	 * 模版名
 	 * @var string
 	 */
 	private static $template = REQUEST_FILE;
-
-	/**
-	 * 禁止使用模版
-	 * @var boolean
-	 */
-	private static $disable = FALSE;
 
 	/**
 	 * 修改要显示的模版
@@ -32,30 +25,11 @@ class Output
 	}
 
 	/**
-	 * 禁止使用模版
-	 * @return void
-	 */
-	public static function disableView()
-	{
-		self::$disable = TRUE;
-	}
-
-	/**
 	 * 响应输出
 	 */
-	public static function response()
+	public static function response($output)
 	{
-		IS_AJAX ? self::view() : self::json();
-	}
-
-	/**
-	 * 系统错误响应
-	 * @return void
-	 */
-	public static function serverError()
-	{		
-		// 抛出500服务器错误
-		header("Location: /50x.html");
+		IS_AJAX ? self::view($output) : self::json($output);
 	}
 
 	/**
@@ -63,14 +37,45 @@ class Output
 	 */
 	private static function view()
 	{
-
+		$view = new \Mvc\View();		
+		$view->display(self::$template, $output);
 	}
 
 	/**
 	 * json输出
 	 */
-	private static function json()
+	private static function json($output, $status=1, $url="")
 	{
-
+		$output['status'] = $status;
+		$output['url'] = $url;
+		exit(json_encode($output));
+	}
+	
+	public static function _403()
+	{
+		
+	}
+	
+	public static function _404()
+	{
+		
+	}
+	
+	/**
+	 * 系统错误响应
+	 * @return void
+	 */
+	public static function _50x()
+	{
+		if(IS_AJAX)
+		{
+			$error = array(msg=>"系统错误");
+			self::json($error, 0);
+		}
+		else
+		{
+			// 抛出500服务器错误
+			header("Location: /50x.html");
+		}
 	}
 }

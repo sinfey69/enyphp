@@ -8,7 +8,7 @@
  */
 function C($index, $item=NULL)
 {
-	$pref = empty(Eny::$_CFG[$index]) ? NULL : Eny::$_CFG[$index];
+	$pref = empty($GLOBALS['_CFG'][$index]) ? NULL : $GLOBALS['_CFG'][$index];
 
 	if($pref && !is_null($item))
 	{
@@ -23,7 +23,7 @@ function C($index, $item=NULL)
  * @param string key键
  * @return string
  */
-function lang($key)
+function L($key)
 {
 	static $lang;
 	static $package;
@@ -59,9 +59,20 @@ function lang($key)
  * @param  找不到值后的默认值
  * @return mixed 找到返回内容,否则返回第二个参数的内容
  */
-function server($index, $defualt=NULL)
+function S($index, $defualt=NULL)
 {
 	return empty($_SERVER[$index]) ? $defualt : addslashes($_SERVER[$index]);
+}
+
+/**
+ * 获取url地址
+ * @param string pathinfo
+ * @param string
+ * @return
+ */
+function U($pathinfo, $args)
+{
+
 }
 
 /**
@@ -70,7 +81,7 @@ function server($index, $defualt=NULL)
  * @param string 基准目录
  * @return string 绝对路径文件名
  */
-function absFile($path, $abs='./')
+function F($path, $abs='./')
 {
 	// 文件信息
 	$path = trim($path, '/');

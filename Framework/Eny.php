@@ -73,13 +73,13 @@ class Eny
 		define('IS_MOBILE',isMoblie());//手机端请求
 		define('CLIENT_IP',ip());//ip地址
 		IS_CLI OR header('Content-Type:text/html;charset=UTF-8');// 字符集设置
-		date_default_timezone_set(C('global', 'timezone'));// 日期设置
-		spl_autoload_register('Eny::appAutoload'); // 自动加载机制
+		date_default_timezone_set(config('global', 'timezone'));// 日期设置
+		spl_autoload_register('self::appAutoload'); // 自动加载机制
 		if(!DEBUG)
 		{
-			set_exception_handler('Eny::appException');// 自定义异常机制
-			set_error_handler('Eny::appError');// 自定义错误机制
-			register_shutdown_function('Eny::appShutdown');// 程序退出前回调机制
+			set_exception_handler('self::appException');// 自定义异常机制
+			set_error_handler('self::appError');// 自定义错误机制
+			register_shutdown_function('self::appShutdown');// 程序退出前回调机制
 			error_reporting(0);// 关闭报错
 			ini_set('display_errors','off');// 关闭报错
 		}		
@@ -107,6 +107,8 @@ class Eny
 		$controller->$function();
 		// 控制器执行后
 		!method_exists($controller, '_end') OR $controller->_end();
+		// 最终输出
+		Output::response($output);
  	}
 
  	/**
@@ -124,6 +126,8 @@ class Eny
 			require($file);
 			$temp = array_merge($config, $temp);
 		}
+		// 封装成对象
+		$temp = json_decode(json_encode($temp));
 		$GLOBALS['_CFG'] = $temp;
  	}
 
@@ -163,7 +167,7 @@ class Eny
 		// 错误转向
 		Log::error($error[$errno], $errstr, $errfile, $errline);
 		// 服务器错误
-		header('Location: /50x.html');
+		Output::serverError();
 	}	
 
 	/**

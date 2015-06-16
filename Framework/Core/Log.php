@@ -6,7 +6,7 @@
 
 namespace Core;
 
-class L
+class Log
 {
 	/**
 	 * 服务器错误日志记录
