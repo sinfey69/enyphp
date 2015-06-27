@@ -5,15 +5,15 @@
  */
 
 use
-\Core\Config,// 配置类
-\Core\Hook,// 钩子类
-\Core\Input,// 输入类
-\Core\Log,// 日志类
-\Core\Output,// 输出类
-\Core\Router,// 路由类
-\Core\Session;// session类
-
-use Core\Dispatcher;
+Core\Config,// 配置类
+Core\Dispatcher,// 路由调度类
+Core\Hook,// 钩子类
+Core\Validate,// 输入类
+Core\Log,// 日志
+Core\Request,//请求类
+Core\Response,// 响应类
+Core\Router,// 路由类
+Core\Session;// session类
 
 class Eny
 {
@@ -30,7 +30,7 @@ class Eny
 		// 加载配置
 		Config::configure(CONFIG);
 		// 数据检查
-		Input::validity();
+		Validate::validity();
 		// session初始化
 		Session::start();
 		// 调度程序
