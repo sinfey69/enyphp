@@ -13,6 +13,8 @@ use
 \Core\Router,// 路由类
 \Core\Session;// session类
 
+use Core\Dispatcher;
+
 class Eny
 {
 	/**
@@ -23,14 +25,16 @@ class Eny
 	{
 		// 目录定义
 		self::structure();
-		// 加载文件
-		self::loadfile();
-		// 加载配置
-		Config::configure(CONFIG);
 		// 初始化环境
 		self::environment();
-		// 程序运行
-		self::application();
+		// 加载配置
+		Config::configure(CONFIG);
+		// 数据检查
+		Input::validity();
+		// session初始化
+		Session::start();
+		// 调度程序
+		Dispatcher::dispatch();
 	}
 
 	/**
@@ -53,18 +57,7 @@ class Eny
 		define('CACHE', DATA.'Cache/');// 缓存目录
 		define('COMPILE', DATA.'Compile/');// 编译文件
 		define('FONT', DATA.'Font/');// 字体目录
-		define('LOCK', DATA.'Lock/');// 锁目录
 		define('SESSION', DATA.'Session/');// SESSION目录
-	}
-
-	/**
-	 * 通用文件加载
-	 * @return void
-	 */
-	private static function loadfile()
-	{
-		// 全局函数
-		require(FRAMEWORK.'Core/Function.php');
 	}
 	
 	/**
@@ -123,7 +116,7 @@ class Eny
 		// 错误记录
 		Log::error($error[$errno], $errstr, $errfile, $errline);
 		// 服务器错误
-		Output::_500();
+		Response::_500();
 	}	
 
 	/**
@@ -157,28 +150,4 @@ class Eny
 			}
 		}
 	}
-
-	/**
-	 * 程序执行
-	 * @return void
-	 */
-	private static function application()
-	{		
-		// 路由解析
-		list($class, $function) = Request::dispatch();
-		// 数据检查
-		Input::validity();
-		// session初始化
-		Session::initialize();
-		// 控制器运行前的钩子
-		Hook::runHook('prevController');
-		// 创建控制器
-		$controller = new $class();
-		// 控制器执行前
-		call_user_func(array($controller, '_before'));
-		call_user_func(array($controller, $function));
-		call_user_func(array($controller, '_after'));
-		// 最终输出
-		Output::response($output);
- 	}
 }

@@ -8,7 +8,7 @@ class Session
 	 * 初始化Session存储方式
 	 * @return void
 	 */
-	public static function initialize()
+	public static function start()
 	{
 		$config = C::session();
 		// 设置session名

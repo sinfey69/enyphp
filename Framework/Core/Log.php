@@ -18,7 +18,7 @@ class Log
 	 */
 	public static function error($code, $message, $file, $line)
 	{
-		// 错误符号
+		// 错误常量字符串
 		$error = array(
 			0 => 'E_EXCEPTION',
 			1 => 'E_ERROR',

@@ -7,53 +7,39 @@ namespace Core;
  */
 class Request
 {
-    /**
-     * 获取$_SERVER信息
-     * @param <string> 下标值
-     * @param <mixed> 不存在返回的值
-     * @return <string>
-     */
-    public static function server($index, $default=NULL)
+    public function isCli()
     {
-        return empty($_SERVER[$index]) ? $defualt : addslashes($_SERVER[$index]);
+        return !strcasecmp(php_sapi_name(), 'cli');
     }
-
-    /**
-     * 获取ip地址
-     */
-    public static function ip()
+    
+    public function isGet()
     {
-        if(IS_CLI)
-        {
-            return '127.0.0.1';
-        }
-
-        $ip = NULL;
-        $froms = array(
-            'HTTP_CLIENT_IP',
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_FORWARDED_FOR',
-            'REMOTE_ADDR'
-        );
-        foreach($froms as $from)
-        {
-            if($ip = getenv($from))
-            {
-                break;
-            }
-        }
-
-        return $ip;
+        return strcasecmp($this->getServer('REQUEST_METHOD'), 'GET');
     }
-
-    /**
-     * 是否手机端请求
-     * @return boolean
-     */
-    public static function isMoblie()
+    
+    public function isPost()
     {
-        if($userAgent = server('HTTP_USER_AGENT'))
+        return strcasecmp($this->getServer('REQUEST_METHOD'), 'POST');
+    }
+    
+    public function isPut()
+    {
+        return strcasecmp($this->getServer('REQUEST_METHOD'), 'PUT');
+    }
+    
+    public function isDelete()
+    {
+        return strcasecmp($this->getServer('REQUEST_METHOD'), 'DELETE');
+    }
+    
+    public static function isAjax()
+    {
+        return strcasecmp($this->getServer('REQUEST_METHOD'),'xmlhttprequest');
+    }       
+
+    public function isMoblie()
+    {
+        if($userAgent = $this->getServer('HTTP_USER_AGENT'))
         {
             $mobileType = array("240x320","acer","acoon","acs-","abacho","ahong","airness","alcatel","amoi",
                 "android","anywhereyougo.com","applewebkit/525","applewebkit/532","asus","audio",
@@ -78,5 +64,73 @@ class Request
             }
         }
         return FALSE;
+    }
+    
+    public function getQuery()
+    {
+        
+    }
+    
+    public function getUri()
+    {
+        
+    }
+    
+    public function getPost()
+    {
+        
+    }
+    
+    public function getPut()
+    {
+        
+    }
+    
+    public function getDelete()
+    {
+    }
+     
+    /**
+     * 获取$_SERVER信息
+     * @param <string> 下标值
+     * @param <mixed> 不存在返回的值
+     * @return <string>
+     */
+    public function getServer($index, $default=NULL)
+    {
+        return empty($_SERVER[$index]) ? $defualt : addslashes($_SERVER[$index]);
+    }
+    
+    /**
+     * 获取ip地址
+     */
+    public static function getIp()
+    {
+        if(IS_CLI)
+        {
+            return '127.0.0.1';
+        }
+    
+        $ip = NULL;
+        $source = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'REMOTE_ADDR');
+        foreach($source as $from)
+        {
+            if($ip = getenv($from))
+            {
+                break;
+            }
+        }
+    
+        return $ip;
+    }
+    
+    /**
+     * 获取PUT和DELETE参数
+     * @return array
+     */
+    private function getPhpInput()
+    {
+        parse_str(file_get_contents('php://input'), $_INPUT);
+        return $_INPUT;
     }
 }

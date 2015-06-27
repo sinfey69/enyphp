@@ -28,35 +28,3 @@
 版本信息：alpha 2015.05.10_0.3<br/>
 作者：enychen<br/>
 
----------------------------------------------------
-nginx配置文件<br/>
-server {<br/>
-        listen 80;<br/>
-        server_name www.test.com;<br/>
-        root /var/www/enyphp/Bootstrap;<br/>
-
-        try_files $uri /index.php$uri?$args;<br/>
-
-        location ~* \/.*\.php {<br/>
-                fastcgi_pass unix:/dev/shm/php-fpm.sock;<br/>
-                fastcgi_split_path_info         ^(.+\.php)(.*)$;<br/>
-                fastcgi_param PATH_INFO         $fastcgi_path_info;<br/>
-                fastcgi_param SCRIPT_NAME       $fastcgi_script_name;<br/>
-                fastcgi_param SCRIPT_FILENAME   $document_root$fastcgi_script_name;<br/>
-                include fastcgi.conf;<br/>
-        }<br/>
-
-        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css|ico)$ {<br/>
-                access_log off;<br/>
-                expires 30d;<br/>
-        }<br/>
-
-        location ~* /\.ht {<br/>
-                deny all;<br/>
-        }<br/>
-
-        access_log /var/log/nginx/www.test.com_access_log;<br/>
-        error_log /var/log/nginx/www.test.com_error_log;<br/>
-}<br/>
----------------------------------------------------
-

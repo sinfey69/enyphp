@@ -4,7 +4,7 @@
  * @author enychen
  */
 
-namespace Extend;
+namespace Extend\File;
 
 class Concurrent
 {	

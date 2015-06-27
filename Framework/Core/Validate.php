@@ -6,7 +6,7 @@
 
 namespace Core;
 
-class Input
+class Validate
 {
 	/**
 	 * 合法数据存储数组
